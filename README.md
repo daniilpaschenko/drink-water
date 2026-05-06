@@ -1,3 +1,91 @@
-# drink_water
+# Drink Water
 
-A new Flutter project.
+A mobile app for tracking water consumption throughout the day. Developed with Flutter
+
+
+## Screenshots
+
+*will be here soon*
+
+
+## Functionality
+
+- User registration with calculation of daily water intake by formula (weight × 33 ml)
+- Real-time tracking of water consumed with progress bar
+- Water consumption history by day with weekly calendar
+- Custom container cards with icon and volume selection
+- Profile editing - name, weight, daily goal
+- Automatic counter reset to new day
+- Data saving between sessions
+
+
+## Architecture
+
+The project is based on the **Repository Pattern** with **Provider** as state management.
+
+```
+lib/
+├── logic/
+│   ├── auth_logic.dart
+│   ├── user_repository.dart
+│   ├── water_repository.dart
+│   └── card_repository.dart
+├── screens/
+│   ├── auth_screen.dart
+│   ├── register_screen.dart
+│   ├── home_screen.dart
+│   ├── account_screen.dart
+│   ├── history_screen.dart
+│   ├── info_screen.dart
+│   └── settings_screen.dart
+└── widgets/
+    ├── appbar.dart
+    ├── water_card.dart
+    ├── water_progress_bar.dart
+    ├── week_calendar.dart
+    └── editable_field.dart
+```
+
+
+## Technologies
+
+- **Flutter** — UI framework
+- **Provider** — State management
+- **SharedPreferences** — Local storage
+- **percent_indicator** — Progress bar
+- **font_awesome_flutter** — Icons 
+
+
+
+## Development Principles
+
+- SOLID principles
+- Repository Pattern
+- Dependency Injection (Provider)
+- Responsive UI - all sizes are calculated from the screen width
+
+
+
+## Launching a project
+
+**Requirements:**
+- Flutter SDK 3.x+
+- Dart 3.x+
+
+**Installation:**
+
+```
+git clone https://github.com/daniilpaschenko/drink_water.git
+cd drink_water
+flutter pub get
+flutter run
+```
+
+
+
+## Coming soon
+
+- Firebase Auth - Authentication and Cloud Storage
+- Push Notifications - Reminders to drink water
+- Localization - Support for multiple languages
+- Dark Theme
