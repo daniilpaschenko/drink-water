@@ -75,8 +75,8 @@ lib/
 **Installation:**
 
 ```
-git clone https://github.com/daniilpaschenko/drink_water.git
-cd drink_water
+git clone https://github.com/daniilpaschenko/drink-water.git
+cd drink-water
 flutter pub get
 flutter run
 ```
