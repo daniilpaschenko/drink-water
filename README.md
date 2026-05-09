@@ -51,7 +51,7 @@ lib/
 
 - **Flutter** — UI framework
 - **Provider** — State management
-- **Firebase Auth** - Authentication
+- **Firebase Auth** — Authentication
 - **Cloud Firestore** — Cloud database
 - **SharedPreferences** — Local storage
 - **percent_indicator** — Progress bar
