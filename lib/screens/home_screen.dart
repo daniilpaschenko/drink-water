@@ -138,6 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final userRepo = context.watch<UserRepository>();
     final waterRepo = context.watch<WaterRepository>();
     final cardRepo = context.watch<CardRepository>();
+    if (userRepo.currentUser == null) return const SizedBox();
     final user = userRepo.currentUser!;
     return Scaffold(
       appBar: buildMainAppBar(context: context),

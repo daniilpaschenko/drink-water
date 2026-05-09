@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'register_screen.dart';
 // import 'home_screen.dart'; // вернуть когда добавлю кнопку "войти"
 // import '../logic/auth_logic.dart';
-// import 'login_screen.dart';
+import 'login_screen.dart';
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
@@ -33,12 +33,20 @@ class AuthScreen extends StatelessWidget {
                       child: Text("Зарегистрироваться", style:
                       TextStyle(
                         fontSize: titleSize,
-                        color: Color.fromARGB(255, 15, 11, 218)
+                        color: const Color.fromARGB(255, 15, 11, 218)
                       )
                       ),
                     ),
                   ),
-                    // позже сюда добавить кнопку "Войти"
+                  SizedBox(height: screenW * 0.03),
+                  SizedBox(
+                    width: screenW * 0.8,
+                    height: screenW * 0.08,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                      child: Text("Войти", style: TextStyle(fontSize: titleSize, color: const Color.fromARGB(255, 15, 11, 218))),
+                    ),
+                  ),
                 ],
               ),
             )

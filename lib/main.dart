@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
 import 'logic/auth_logic.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // инициализация firebase
 
   final userRepo = UserRepository();
   final waterRepo = WaterRepository();

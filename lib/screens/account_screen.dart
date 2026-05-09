@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/appbar.dart'; // appbar из отдельного файла
 import '../widgets/editable_field.dart';
 import '../logic/auth_logic.dart';
@@ -43,7 +44,9 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _logout() async {
-    await context.read<AuthLogic>().logout();
+    await context.read<UserRepository>().signOut();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context, MaterialPageRoute(builder: (_) => const AuthScreen()), (route) => false,
@@ -75,7 +78,9 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget build(BuildContext context) {
     double screenW = MediaQuery.of(context).size.width;
     double titleSize = screenW * 0.04;
-    final user = context.watch<UserRepository>().currentUser!;
+    final userRepo = context.watch<UserRepository>();
+    if (userRepo.currentUser == null) return const SizedBox();
+    final user = userRepo.currentUser!;
     final waterRepo = context.watch<WaterRepository>();
     return Scaffold(
       appBar: buildMainAppBar(context: context, isAccountEnabled: false), // отключение кнопки аккаунта, т.к. уже на этом экране

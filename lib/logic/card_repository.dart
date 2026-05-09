@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class BaseCard {
   String get title;
@@ -43,6 +45,31 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
   @override
   List<BaseCard> customCards = [];
 
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+  String? get _uid => _auth.currentUser?.uid;
+
+  Future<void> _saveToFirestore() async {
+    if (_uid == null) return;
+    await _firestore.collection("users").doc(_uid).update({
+      "cards": customCards.map((e) => e.toJson()).toList(),
+    });
+  }
+
+  Future<void> loadFromFirestore() async {
+    if (_uid == null) return;
+    final doc = await _firestore.collection("users").doc(_uid).get();
+    if (doc.exists) {
+      final data = doc.data()!;
+      final cardsData = data["cards"] as List<dynamic>?;
+      if (cardsData != null) {
+        customCards = cardsData.map((e) => CustomCard.fromJson(e as Map<String, dynamic>)).toList();
+        await _save(); // синхронизируем с SharedPreferences
+      }
+      notifyListeners();
+    }
+  }
+
   @override
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -54,6 +81,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
   Future<void> addCard(String title, double liters, String iconName) async {
     customCards.add(CustomCard(title: title, liters: liters, iconName: iconName));
     await _save();
+    await _saveToFirestore();
     notifyListeners();
   }
 
@@ -61,6 +89,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
   Future<void> removeCard(int index) async {
     customCards.removeAt(index);
     await _save();
+    await _saveToFirestore();
     notifyListeners();
   }
 
@@ -71,6 +100,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
       CustomCard(title: "Бутылка", liters: 0.5, iconName: 'bottle'),
     ];
     await _save();
+    await _saveToFirestore();
     notifyListeners();
   }
 
@@ -80,6 +110,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
       "custom_cards",
       customCards.map((e) => jsonEncode(e.toJson())).toList(),
     );
+    await _saveToFirestore();
   }
 
   @override

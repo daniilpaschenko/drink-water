@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class IWaterRepository {
   double get drankLiters;
@@ -20,6 +22,49 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
 
   @override
   Map<String, double> waterHistory = {};
+
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+  String? get _uid => _auth.currentUser?.uid;
+
+  // сохранение в Firestore
+  Future<void> _saveToFirestore() async {
+    if (_uid == null) return;
+    await _firestore.collection("users").doc(_uid).update({
+      "waterHistory": waterHistory,
+      "drankLiters": drankLiters,
+      "lastDate": DateTime.now().toIso8601String().substring(0, 10),
+    });
+  }
+
+  // загрузка из Firestore
+  Future<void> loadFromFirestore() async {
+    if (_uid == null) return;
+    final doc = await _firestore.collection("users").doc(_uid).get();
+    if (doc.exists) {
+      final data = doc.data()!;
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      final savedDate = data["lastDate"] as String?;
+
+      if (savedDate == today) {
+        drankLiters = (data["drankLiters"] as num?)?.toDouble() ?? 0.0;
+      } else {
+        drankLiters = 0.0;
+      }
+
+      final historyData = data["waterHistory"] as Map<String, dynamic>?;
+      if (historyData != null) {
+        waterHistory = historyData.map((k, v) => MapEntry(k, (v as num).toDouble()));
+      }
+
+      // синхронизируем с SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble("drank_liters", drankLiters);
+      await prefs.setString("water_history", jsonEncode(waterHistory));
+      await prefs.setString("last_date", today);
+      notifyListeners();
+    }
+  }
 
   @override
   Future<void> load() async {
@@ -53,6 +98,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble("drank_liters", drankLiters);
     await prefs.setString("water_history", jsonEncode(waterHistory));
+    await _saveToFirestore();
     notifyListeners();
   }
 
