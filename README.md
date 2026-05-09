@@ -51,6 +51,8 @@ lib/
 
 - **Flutter** — UI framework
 - **Provider** — State management
+- **Firebase Auth** - Authentication
+- **Cloud Firestore** — Cloud database
 - **SharedPreferences** — Local storage
 - **percent_indicator** — Progress bar
 - **font_awesome_flutter** — Icons 
@@ -85,7 +87,6 @@ flutter run
 
 ## Coming soon
 
-- Firebase Auth - Authentication and Cloud Storage
 - Push Notifications - Reminders to drink water
-- Localization - Support for multiple languages
 - Dark Theme
+- Localization - Support for multiple languages
