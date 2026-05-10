@@ -92,6 +92,7 @@ flutter run
 
 ## Coming soon
 
-- Push Notifications - Reminders to drink water
+- Registration via email verification code
 - Dark Theme
-- Localization - Support for multiple languages
+- Push Notifications - Reminders to drink water
+- Localization - Support for multiple languages (or not)
