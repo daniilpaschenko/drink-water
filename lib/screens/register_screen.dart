@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../logic/auth_logic.dart';
+import '../logic/user_repository.dart';
+import '../logic/card_repository.dart';
 import 'home_screen.dart';
 import 'package:flutter/services.dart';
 

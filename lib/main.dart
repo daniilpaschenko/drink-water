@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
-import 'logic/auth_logic.dart';
+import 'logic/user_repository.dart';
+import 'logic/water_repository.dart';
+import 'logic/card_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // инициализация firebase
+  await Firebase.initializeApp();
 
+  // Создаём singleton-репозитории
   final userRepo = UserRepository();
   final waterRepo = WaterRepository();
   final cardRepo = CardRepository();
@@ -35,13 +38,14 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userRepo = context.watch<UserRepository>();
+    
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: 'Rubik',
       ),
       title: 'Drink Water',
-      home: userRepo.isLoggedIn ? HomeScreen() : AuthScreen(),
+      home: userRepo.isLoggedIn ? const HomeScreen() : const AuthScreen(),
     );
   }
 }

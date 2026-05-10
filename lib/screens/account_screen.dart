@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/appbar.dart'; // appbar из отдельного файла
 import '../widgets/editable_field.dart';
-import '../logic/auth_logic.dart';
+import '../logic/user_repository.dart';
+import '../logic/water_repository.dart';
 import 'auth_screen.dart';
 
 class AccountScreen extends StatefulWidget {
