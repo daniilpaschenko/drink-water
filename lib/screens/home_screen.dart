@@ -9,7 +9,7 @@ import '../widgets/water_card.dart';
 import '../widgets/water_progress_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/water_entry_tile.dart';
-// import '../models/water_entry.dart';
+import '../core/constants.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,24 +19,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final Map<String, dynamic> _iconMap = {
-    "droplet": FontAwesomeIcons.droplet,
-    "glass": FontAwesomeIcons.glassWater,
-    "bottle": FontAwesomeIcons.bottleWater,
-    "mug": FontAwesomeIcons.mugHot,
-    "bucket": FontAwesomeIcons.bucket,
-    "plate": FontAwesomeIcons.bowlFood
-  };
-
-  final Map<String, String> _iconLabels = {
-    "droplet": "Капля",
-    "glass": "Стакан",
-    "bottle": "Бутылка",
-    "mug": "Кружка",
-    "bucket": "Ведро",
-    "plate": "Тарелка",
-  };
-
   void _showSuccess(double liters) {
     ScaffoldMessenger.of(context).clearSnackBars();
     final controller = ScaffoldMessenger.of(context).showSnackBar(
@@ -98,11 +80,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: selectedIcon,
                   decoration: InputDecoration(labelText: "Иконка", labelStyle: TextStyle(fontSize: titleSize * 0.75)),
-                  items: _iconLabels.entries.map((e) => DropdownMenuItem(
+                  items: iconLabels.entries.map((e) => DropdownMenuItem(
                     value: e.key,
                     child: Row(
                       children: [
-                        FaIcon(_iconMap[e.key], size: titleSize * 1.2),
+                        FaIcon(appIcons[e.key], size: titleSize * 1.2),
                         SizedBox(width: screenW * 0.03),
                         Text(e.value, style: TextStyle(fontSize: titleSize)),
                       ],
@@ -196,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         return WaterCard(
                           title: card.title,
                           value: "$ml мл",
-                          icon: _iconMap[card.iconName] ?? FontAwesomeIcons.glassWater,
+                          icon: appIcons[card.iconName] ?? FontAwesomeIcons.glassWater,
                           color: Colors.blue,
                           onTap: () {
                             waterRepo.addWater(card.liters, cardTitle: card.title, iconName: card.iconName);
@@ -248,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return WaterEntryTile(
                         entry: entry.value,
                         index: entry.key,
-                        iconMap: _iconMap,
+                        iconMap: appIcons,
                         onDelete: () => waterRepo.removeEntry(entry.key),
                       );
                     }),

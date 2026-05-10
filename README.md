@@ -26,6 +26,8 @@ The project is based on the **Repository Pattern** with **Provider** as state ma
 
 ```
 lib/
+├── core/
+│   └── constants.dart
 ├── logic/
 │   ├── user_repository.dart
 │   ├── water_repository.dart
