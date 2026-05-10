@@ -8,6 +8,8 @@ import '../widgets/appbar.dart';
 import '../widgets/water_card.dart';
 import '../widgets/water_progress_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../widgets/water_entry_tile.dart';
+// import '../models/water_entry.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -197,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: _iconMap[card.iconName] ?? FontAwesomeIcons.glassWater,
                           color: Colors.blue,
                           onTap: () {
-                            waterRepo.addWater(card.liters);
+                            waterRepo.addWater(card.liters, cardTitle: card.title, iconName: card.iconName);
                             _showSuccess(card.liters);
                           },
                           onLongPress: () {
@@ -234,6 +236,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
+                  SizedBox(height: screenW * 0.1),
+                  Text(
+                    "Записи за сегодня",
+                    style: TextStyle(fontSize: titleSize),
+                  ),
+                  // лог выпитой воды
+                  if (waterRepo.todayEntries.isNotEmpty) ...[
+                    SizedBox(height: screenW * 0.02),
+                    ...waterRepo.todayEntries.asMap().entries.map((entry) {
+                      return WaterEntryTile(
+                        entry: entry.value,
+                        index: entry.key,
+                        iconMap: _iconMap,
+                        onDelete: () => waterRepo.removeEntry(entry.key),
+                      );
+                    }),
+                  ],
                   SizedBox(height: screenW * 0.1),
                 ],
               ),

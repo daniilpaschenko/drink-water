@@ -14,6 +14,7 @@ A mobile app for tracking water consumption throughout the day. Developed with F
 - Real-time tracking of water consumed with progress bar
 - Water consumption history by day with weekly calendar
 - Custom container cards with icon and volume selection
+- Today's water activity with the option to view the time and delete the recording
 - Profile editing - name, weight, daily goal
 - Automatic counter reset to new day
 - Data saving between sessions
@@ -30,6 +31,10 @@ lib/
 │   ├── user_repository.dart
 │   ├── water_repository.dart
 │   └── card_repository.dart
+├── models/
+│   ├── custom_card.dart
+│   ├── user_data.dart
+│   └── water_entry.dart
 ├── screens/
 │   ├── auth_screen.dart
 │   ├── register_screen.dart

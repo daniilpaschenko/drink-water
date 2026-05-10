@@ -3,12 +3,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/water_entry.dart';
 
 abstract class IWaterRepository {
   double get drankLiters;
   Map<String, double> get waterHistory;
+  List<WaterEntry> get todayEntries;
   Future<void> load();
-  Future<void> addWater(double liters);
+  Future<void> addWater(double liters, {String cardTitle, String iconName});
+  Future<void> removeEntry(int index);
   Future<void> clear();
 }
 
@@ -22,6 +25,8 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
 
   @override
   Map<String, double> waterHistory = {};
+  @override
+  List<WaterEntry> todayEntries = [];
 
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
@@ -34,6 +39,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
       "waterHistory": waterHistory,
       "drankLiters": drankLiters,
       "lastDate": DateTime.now().toIso8601String().substring(0, 10),
+      "todayEntries": todayEntries.map((e) => e.toJson()).toList(),
     });
   }
 
@@ -57,6 +63,13 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
         waterHistory = historyData.map((k, v) => MapEntry(k, (v as num).toDouble()));
       }
 
+      final entriesData = data["todayEntries"] as List<dynamic>?;
+      if (entriesData != null && savedDate == today) {
+        todayEntries = entriesData.map((e) => WaterEntry.fromJson(e as Map<String, dynamic>)).toList();
+      } else {
+        todayEntries = [];
+      }
+
       // синхронизируем с SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble("drank_liters", drankLiters);
@@ -69,7 +82,6 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
   @override
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-
     // если новый день, сброс счётчика
     final today = DateTime.now().toIso8601String().substring(0, 10);
     final savedDate = prefs.getString("last_date");
@@ -79,6 +91,13 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
       drankLiters = 0.0;
       await prefs.setString("last_date", today);
       await prefs.setDouble("drank_liters", 0.0);
+    }
+    final entriesJson = prefs.getString("today_entries");
+    if (entriesJson != null && savedDate == today) {
+      final List<dynamic> decoded = jsonDecode(entriesJson);
+      todayEntries = decoded.map((e) => WaterEntry.fromJson(e)).toList();
+    } else {
+      todayEntries = [];
     }
 
     // загрузка истории
@@ -90,14 +109,40 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
   }
 
   @override
-  Future<void> addWater(double liters) async {
-    if (drankLiters + liters > 100) return; // ограничение 100л
+  Future<void> addWater(double liters, {String cardTitle = "", String iconName = "droplet"}) async {
+    if (drankLiters + liters > 100) return;
     drankLiters += liters;
     final today = DateTime.now().toIso8601String().substring(0, 10);
     waterHistory[today] = drankLiters;
+    
+    todayEntries.add(WaterEntry(
+      cardTitle: cardTitle,
+      iconName: iconName,
+      liters: liters,
+      time: DateTime.now(),
+    ));
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble("drank_liters", drankLiters);
     await prefs.setString("water_history", jsonEncode(waterHistory));
+    await prefs.setString("today_entries", jsonEncode(todayEntries.map((e) => e.toJson()).toList()));
+    await _saveToFirestore();
+    notifyListeners();
+  }
+
+  @override // или нет ?
+  Future<void> removeEntry(int index) async {
+    final entry = todayEntries[index];
+    drankLiters -= entry.liters;
+    if (drankLiters < 0) drankLiters = 0;
+    todayEntries.removeAt(index);
+    
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    waterHistory[today] = drankLiters;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble("drank_liters", drankLiters);
+    await prefs.setString("today_entries", jsonEncode(todayEntries.map((e) => e.toJson()).toList()));
     await _saveToFirestore();
     notifyListeners();
   }
@@ -105,6 +150,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
   @override
   Future<void> clear() async {
     drankLiters = 0.0;
+    todayEntries = [];
     waterHistory = {};
     notifyListeners();
   }

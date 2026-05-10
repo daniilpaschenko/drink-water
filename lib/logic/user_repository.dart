@@ -4,19 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'water_repository.dart';
 import 'card_repository.dart';
-
-class UserData {
-  final String name;
-  final double weight;
-  final double dailyGoal;
-  final double? customGoal;
-
-  UserData({
-    required this.name,
-    required this.weight,
-    this.customGoal,
-  }) : dailyGoal = customGoal ?? (weight * 0.033).clamp(1.5, 4.0);
-}
+import '../models/user_data.dart';
 
 abstract class IUserRepository {
   UserData? get currentUser;
