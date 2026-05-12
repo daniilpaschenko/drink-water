@@ -7,17 +7,47 @@ import '../models/custom_card.dart';
 
 abstract class ICardRepository {
   List<BaseCard> get customCards;
+  bool get isLoading;
+  String? get errorMessage;
+
   Future<void> load();
-  Future<void> addCard(String title, double liters, String iconName);
-  Future<void> removeCard(int index);
-  Future<void> addDefaultCards();
+  Future<bool> addCard(String title, double liters, String iconName);
+  Future<bool> removeCard(int index);
+  Future<bool> addDefaultCards();
   Future<void> clear();
+  void clearError();
+  Future<void> loadFromFirestore();
 }
 
 class CardRepository extends ChangeNotifier implements ICardRepository {
   static final CardRepository _instance = CardRepository._internal();
   factory CardRepository() => _instance;
   CardRepository._internal();
+
+  // флаги обработки ошибок
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  bool get isLoading => _isLoading;
+
+  @override
+  String? get errorMessage => _errorMessage;
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  void _setError(String? message) {
+    _errorMessage = message;
+    notifyListeners();
+  }
+
+  @override
+  void clearError() {
+    _setError(null);
+  }
 
   @override
   List<BaseCard> customCards = [];
@@ -28,71 +58,143 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
 
   Future<void> _saveToFirestore() async {
     if (_uid == null) return;
-    await _firestore.collection("users").doc(_uid).update({
-      "cards": customCards.map((e) => e.toJson()).toList(),
-    });
+    try {
+      await _firestore.collection("users").doc(_uid).update({
+        "cards": customCards.map((e) => e.toJson()).toList(),
+      });
+    } catch (e) {
+      _setError("Не удалось сохранить карточки в облако");
+      rethrow;
+    }
   }
 
+  Future<void> _saveToPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(
+        "custom_cards",
+        customCards.map((e) => jsonEncode(e.toJson())).toList(),
+      );
+    } catch (e) {
+      _setError("Ошибка сохранения карточек локально");
+    }
+  }
+
+  @override
   Future<void> loadFromFirestore() async {
     if (_uid == null) return;
-    final doc = await _firestore.collection("users").doc(_uid).get();
-    if (doc.exists) {
-      final data = doc.data()!;
-      final cardsData = data["cards"] as List<dynamic>?;
-      if (cardsData != null) {
+    _setLoading(true);
+    _setError(null);
+    try {
+      final doc = await _firestore.collection("users").doc(_uid).get();
+      if (doc.exists && doc.data() != null) {
+        final data = doc.data()!;
+        final cardsData = data["cards"] as List<dynamic>? ?? [];
         customCards = cardsData.map((e) => CustomCard.fromJson(e as Map<String, dynamic>)).toList();
-        await _save(); // синхронизируем с SharedPreferences
+        await _saveToPrefs();
+        notifyListeners();
       }
-      notifyListeners();
+    } catch (e) {
+      _setError("Не удалось загрузить карточки из облака");
+    } finally {
+      _setLoading(false);
     }
   }
 
   @override
   Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final cardsJson = prefs.getStringList("custom_cards") ?? [];
-    customCards = cardsJson.map((e) => CustomCard.fromJson(jsonDecode(e))).toList();
+    _setLoading(true);
+    _setError(null);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cardsJson = prefs.getStringList("custom_cards") ?? [];
+      customCards = cardsJson.map((e) => CustomCard.fromJson(jsonDecode(e))).toList();
+      notifyListeners();
+    } catch (e) {
+      _setError("Ошибка загрузки карточек из локального хранилища");
+    } finally {
+      _setLoading(false);
+    }
   }
 
   @override
-  Future<void> addCard(String title, double liters, String iconName) async {
-    customCards.add(CustomCard(title: title, liters: liters, iconName: iconName));
-    await _save();
-    await _saveToFirestore();
-    notifyListeners();
+  Future<bool> addCard(String title, double liters, String iconName) async {
+    _setLoading(true);
+    _setError(null);
+    try {
+      customCards.add(CustomCard(
+        title: title,
+        liters: liters,
+        iconName: iconName,
+      ));
+      await _saveToPrefs();
+      await _saveToFirestore();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError("Не удалось добавить карточку");
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   @override
-  Future<void> removeCard(int index) async {
-    customCards.removeAt(index);
-    await _save();
-    await _saveToFirestore();
-    notifyListeners();
+  Future<bool> removeCard(int index) async {
+    if (index < 0 || index >= customCards.length) {
+      _setError("Неверный индекс карточки");
+      return false;
+    }
+    _setLoading(true);
+    _setError(null);
+    try {
+      customCards.removeAt(index);
+      await _saveToPrefs();
+      await _saveToFirestore();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError("Не удалось удалить карточку");
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   @override
-  Future<void> addDefaultCards() async {
-    customCards = [
-      CustomCard(title: "Стакан", liters: 0.25, iconName: 'glass'),
-      CustomCard(title: "Бутылка", liters: 0.5, iconName: 'bottle'),
-    ];
-    await _save();
-    await _saveToFirestore();
-    notifyListeners();
-  }
-
-  Future<void> _save() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-      "custom_cards",
-      customCards.map((e) => jsonEncode(e.toJson())).toList(),
-    );
-    await _saveToFirestore();
+  Future<bool> addDefaultCards() async {
+    _setLoading(true);
+    _setError(null);
+    try {
+      customCards = [
+        CustomCard(title: "Стакан", liters: 0.25, iconName: 'glass'),
+        CustomCard(title: "Бутылка", liters: 0.5, iconName: 'bottle'),
+      ];
+      await _saveToPrefs();
+      await _saveToFirestore();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError("Не удалось добавить стандартные карточки");
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   @override
   Future<void> clear() async {
-    customCards = [];
-    notifyListeners();
+    _setLoading(true);
+    _setError(null);
+    try {
+      customCards = [];
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove("custom_cards");
+      notifyListeners();
+    } catch (e) {
+      _setError("Ошибка очистки карточек");
+    } finally {
+      _setLoading(false);
+    }
   }
 }

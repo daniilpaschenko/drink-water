@@ -9,10 +9,16 @@ abstract class IWaterRepository {
   double get drankLiters;
   Map<String, double> get waterHistory;
   List<WaterEntry> get todayEntries;
+
+  bool get isLoading;
+  String? get errorMessage;
+
   Future<void> load();
-  Future<void> addWater(double liters, {String cardTitle, String iconName});
-  Future<void> removeEntry(int index);
+  Future<bool> addWater(double liters, {String cardTitle = "", String iconName = "droplet"});
+  Future<bool> removeEntry(int index);
   Future<void> clear();
+  void clearError();
+  Future<void> loadFromFirestore();
 }
 
 class WaterRepository extends ChangeNotifier implements IWaterRepository {
@@ -20,11 +26,37 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
   factory WaterRepository() => _instance;
   WaterRepository._internal();
 
+  // флаги обработки ошибок
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  bool get isLoading => _isLoading;
+
+  @override
+  String? get errorMessage => _errorMessage;
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  void _setError(String? message) {
+    _errorMessage = message;
+    notifyListeners();
+  }
+
+  @override
+  void clearError() {
+    _setError(null);
+  }
+
   @override
   double drankLiters = 0.0;
 
   @override
   Map<String, double> waterHistory = {};
+
   @override
   List<WaterEntry> todayEntries = [];
 
@@ -32,126 +64,178 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
   final _firestore = FirebaseFirestore.instance;
   String? get _uid => _auth.currentUser?.uid;
 
-  // сохранение в Firestore
   Future<void> _saveToFirestore() async {
     if (_uid == null) return;
-    await _firestore.collection("users").doc(_uid).update({
-      "waterHistory": waterHistory,
-      "drankLiters": drankLiters,
-      "lastDate": DateTime.now().toIso8601String().substring(0, 10),
-      "todayEntries": todayEntries.map((e) => e.toJson()).toList(),
-    });
+    try {
+      await _firestore.collection("users").doc(_uid).update({
+        "waterHistory": waterHistory,
+        "drankLiters": drankLiters,
+        "lastDate": DateTime.now().toIso8601String().substring(0, 10),
+        "todayEntries": todayEntries.map((e) => e.toJson()).toList(),
+      });
+    } catch (e) {
+      _setError("Не удалось сохранить данные о воде в облако");
+      rethrow;
+    }
   }
 
-  // загрузка из Firestore
+  Future<void> _saveToPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      await prefs.setDouble("drank_liters", drankLiters);
+      await prefs.setString("water_history", jsonEncode(waterHistory));
+      await prefs.setString("last_date", today);
+      await prefs.setString(
+        "today_entries",
+        jsonEncode(todayEntries.map((e) => e.toJson()).toList()),
+      );
+    } catch (e) {
+      _setError("Ошибка сохранения данных локально");
+    }
+  }
+
+  @override
   Future<void> loadFromFirestore() async {
     if (_uid == null) return;
-    final doc = await _firestore.collection("users").doc(_uid).get();
-    if (doc.exists) {
+    _setLoading(true);
+    _setError(null);
+    try {
+      final doc = await _firestore.collection("users").doc(_uid).get();
+      if (!doc.exists || doc.data() == null) return;
       final data = doc.data()!;
       final today = DateTime.now().toIso8601String().substring(0, 10);
       final savedDate = data["lastDate"] as String?;
 
-      if (savedDate == today) {
-        drankLiters = (data["drankLiters"] as num?)?.toDouble() ?? 0.0;
-      } else {
-        drankLiters = 0.0;
-      }
+      drankLiters = (savedDate == today) ? (data["drankLiters"] as num?)?.toDouble() ?? 0.0 : 0.0;
 
       final historyData = data["waterHistory"] as Map<String, dynamic>?;
-      if (historyData != null) {
-        waterHistory = historyData.map((k, v) => MapEntry(k, (v as num).toDouble()));
-      }
+      waterHistory = historyData?.map((k, v) => MapEntry(k, (v as num).toDouble())) ?? {};
 
       final entriesData = data["todayEntries"] as List<dynamic>?;
-      if (entriesData != null && savedDate == today) {
-        todayEntries = entriesData.map((e) => WaterEntry.fromJson(e as Map<String, dynamic>)).toList();
-      } else {
-        todayEntries = [];
-      }
-
-      // синхронизируем с SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setDouble("drank_liters", drankLiters);
-      await prefs.setString("water_history", jsonEncode(waterHistory));
-      await prefs.setString("last_date", today);
+      todayEntries = (savedDate == today && entriesData != null)
+      ? entriesData.map((e) => WaterEntry.fromJson(e as Map<String, dynamic>)).toList() : [];
+      await _saveToPrefs();
       notifyListeners();
+    } catch (e) {
+      _setError("Не удалось загрузить данные о воде из облака");
+    } finally {
+      _setLoading(false);
     }
   }
 
   @override
   Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    // если новый день, сброс счётчика
-    final today = DateTime.now().toIso8601String().substring(0, 10);
-    final savedDate = prefs.getString("last_date");
-    if (savedDate == today) {
-      drankLiters = prefs.getDouble("drank_liters") ?? 0.0;
-    } else {
-      drankLiters = 0.0;
-      await prefs.setString("last_date", today);
-      await prefs.setDouble("drank_liters", 0.0);
-    }
-    final entriesJson = prefs.getString("today_entries");
-    if (entriesJson != null && savedDate == today) {
-      final List<dynamic> decoded = jsonDecode(entriesJson);
-      todayEntries = decoded.map((e) => WaterEntry.fromJson(e)).toList();
-    } else {
-      todayEntries = [];
-    }
+    _setLoading(true);
+    _setError(null);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      final savedDate = prefs.getString("last_date");
 
-    // загрузка истории
-    final historyJson = prefs.getString("water_history");
-    if (historyJson != null) {
-      final Map<String, dynamic> decoded = jsonDecode(historyJson);
-      waterHistory = decoded.map((k, v) => MapEntry(k, v.toDouble()));
+      if (savedDate == today) {
+        drankLiters = prefs.getDouble("drank_liters") ?? 0.0;
+      } else {
+        drankLiters = 0.0;
+        await prefs.setString("last_date", today);
+        await prefs.setDouble("drank_liters", 0.0);
+      }
+
+      final entriesJson = prefs.getString("today_entries");
+      if (entriesJson != null && savedDate == today) {
+        final List<dynamic> decoded = jsonDecode(entriesJson);
+        todayEntries = decoded.map((e) => WaterEntry.fromJson(e)).toList();
+      } else {
+        todayEntries = [];
+      }
+
+      final historyJson = prefs.getString("water_history");
+      if (historyJson != null) {
+        final Map<String, dynamic> decoded = jsonDecode(historyJson);
+        waterHistory = decoded.map((k, v) => MapEntry(k, (v as num).toDouble()));
+      }
+      notifyListeners();
+    } catch (e) {
+      _setError("Ошибка загрузки данных о воде из локального хранилища");
+    } finally {
+      _setLoading(false);
     }
   }
 
   @override
-  Future<void> addWater(double liters, {String cardTitle = "", String iconName = "droplet"}) async {
-    if (drankLiters + liters > 100) return;
-    drankLiters += liters;
-    final today = DateTime.now().toIso8601String().substring(0, 10);
-    waterHistory[today] = drankLiters;
-    
-    todayEntries.add(WaterEntry(
-      cardTitle: cardTitle,
-      iconName: iconName,
-      liters: liters,
-      time: DateTime.now(),
-    ));
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble("drank_liters", drankLiters);
-    await prefs.setString("water_history", jsonEncode(waterHistory));
-    await prefs.setString("today_entries", jsonEncode(todayEntries.map((e) => e.toJson()).toList()));
-    await _saveToFirestore();
-    notifyListeners();
+  Future<bool> addWater(double liters, {String cardTitle = "", String iconName = "droplet"}) async {
+    if (liters <= 0) {
+      _setError("Объём должен быть больше нуля");
+      return false;
+    }
+    _setLoading(true);
+    _setError(null);
+    try {
+      drankLiters += liters;
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      waterHistory[today] = drankLiters;
+      todayEntries.add(WaterEntry(
+        cardTitle: cardTitle,
+        iconName: iconName,
+        liters: liters,
+        time: DateTime.now(),
+      ));
+      await _saveToPrefs();
+      await _saveToFirestore();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError("Не удалось добавить запись о воде");
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 
-  @override // или нет ?
-  Future<void> removeEntry(int index) async {
-    final entry = todayEntries[index];
-    drankLiters -= entry.liters;
-    if (drankLiters < 0) drankLiters = 0;
-    todayEntries.removeAt(index);
-    
-    final today = DateTime.now().toIso8601String().substring(0, 10);
-    waterHistory[today] = drankLiters;
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble("drank_liters", drankLiters);
-    await prefs.setString("today_entries", jsonEncode(todayEntries.map((e) => e.toJson()).toList()));
-    await _saveToFirestore();
-    notifyListeners();
+  @override
+  Future<bool> removeEntry(int index) async {
+    if (index < 0 || index >= todayEntries.length) {
+      _setError("Неверный индекс записи");
+      return false;
+    }
+    _setLoading(true);
+    _setError(null);
+    try {
+      final entry = todayEntries[index];
+      drankLiters -= entry.liters;
+      if (drankLiters < 0) drankLiters = 0.0;
+      todayEntries.removeAt(index);
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      waterHistory[today] = drankLiters;
+      await _saveToPrefs();
+      await _saveToFirestore();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError("Не удалось удалить запись");
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   @override
   Future<void> clear() async {
-    drankLiters = 0.0;
-    todayEntries = [];
-    waterHistory = {};
-    notifyListeners();
+    _setLoading(true);
+    _setError(null);
+    try {
+      drankLiters = 0.0;
+      todayEntries = [];
+      waterHistory = {};
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove("drank_liters");
+      await prefs.remove("today_entries");
+      await prefs.remove("water_history");
+      notifyListeners();
+    } catch (e) {
+      _setError("Ошибка очистки данных о воде");
+    } finally {
+      _setLoading(false);
+    }
   }
 }

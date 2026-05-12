@@ -19,3 +19,14 @@ const Map<String, String> iconLabels = {
 };
 
 const defaultIcon = FontAwesomeIcons.glassWater;
+
+final List<Map<String, String>> faq = [
+  {
+    "question": "Как работает счётчик воды?",
+    "answer": "Счётчик выпитой воды сбрасывается автоматически каждый день в полночь."
+  },
+  {
+    "question": "Можно ли добавить свою тару?",
+    "answer": "Да! На главном экране нажмите карточку 'Новая тара' и введите название и объём. Для удаления — долгое нажатие на карточку."
+  },
+];

@@ -3,9 +3,11 @@
 A mobile app for tracking water consumption throughout the day. Developed with Flutter
 
 
+
 ## Screenshots
 
 *will be here soon*
+
 
 
 ## Functionality
@@ -18,6 +20,7 @@ A mobile app for tracking water consumption throughout the day. Developed with F
 - Profile editing - name, weight, daily goal
 - Automatic counter reset to new day
 - Data saving between sessions
+
 
 
 ## Architecture
@@ -43,14 +46,22 @@ lib/
 │   ├── account_screen.dart
 │   ├── history_screen.dart
 │   ├── info_screen.dart
+│   ├── login_screen.dart
 │   └── settings_screen.dart
 └── widgets/
     ├── appbar.dart
     ├── water_card.dart
     ├── water_progress_bar.dart
+    ├── water_entry_tile.dart
     ├── week_calendar.dart
+    ├── home_body.dart
+    ├── info_section.dart
+    ├── faq_item.dart
+    ├── login_form.dart
+    ├── register_form.dart
     └── editable_field.dart
 ```
+
 
 
 ## Technologies
@@ -94,6 +105,4 @@ flutter run
 ## Coming soon
 
 - Registration via email verification code
-- Dark Theme
 - Push Notifications - Reminders to drink water
-- Localization - Support for multiple languages (or not)
