@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import '../core/constants.dart';
 import 'water_repository.dart';
 import 'card_repository.dart';
 import '../models/user_data.dart';
@@ -17,8 +17,10 @@ abstract class IUserRepository {
   Future<void> register(String name, double weight, {double? customGoal});
   Future<void> setCustomGoal(double? goal);
   Future<void> clear();
-  Future<bool> signUp(String email, String password, String name, double weight);
-  Future<bool> signIn(String email, String password);
+  Future<bool> sendSignInLink(String email);
+  Future<bool> signInWithLink(String emailLink);
+  Future<void> savePendingRegistration(String name, double weight);
+  Future<bool> completePendingRegistration();
   Future<void> signOut();
   void clearError();
 }
@@ -31,7 +33,6 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
-  // флаги для обработки ошибок
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -63,30 +64,6 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
   bool get isLoggedIn => currentUser != null;
 
   String? get _uid => _auth.currentUser?.uid;
-
-  // Перевод ошибок Firebase
-  String _translateFirebaseError(String code) {
-    switch (code) {
-      case 'weak-password':
-        return 'Слишком слабый пароль (минимум 6 символов)';
-      case 'email-already-in-use':
-        return 'Этот email уже используется';
-      case 'invalid-email':
-        return 'Неверный формат email';
-      case 'user-not-found':
-        return 'Пользователь с таким email не найден';
-      case 'wrong-password':
-        return 'Неверный пароль';
-      case 'too-many-requests':
-        return 'Слишком много попыток. Попробуйте позже';
-      case 'network-request-failed':
-        return 'Проблема с подключением к интернету';
-      case 'invalid-credential':
-        return 'Неверные данные для входа';
-      default:
-        return 'Ошибка: $code';
-    }
-  }
 
   @override
   Future<void> load() async {
@@ -121,13 +98,12 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
 
         final name = data["name"] as String;
         final weight = (data["weight"] as num).toDouble();
-        final customGoal = data["customGoal"] != null 
-            ? (data["customGoal"] as num).toDouble() 
+        final customGoal = data["customGoal"] != null
+            ? (data["customGoal"] as num).toDouble()
             : null;
 
         currentUser = UserData(name: name, weight: weight, customGoal: customGoal);
 
-        // Обновляем SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("user_name", name);
         await prefs.setDouble("user_weight", weight);
@@ -154,7 +130,7 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
         "name": currentUser!.name,
         "weight": currentUser!.weight,
         "customGoal": currentUser?.customGoal,
-      }, SetOptions(merge: true)); // чтобы не затереть другие данные
+      }, SetOptions(merge: true));
     } catch (e) {
       _setError("Не удалось сохранить данные в облако");
       rethrow;
@@ -162,20 +138,26 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
   }
 
   @override
-  Future<bool> signUp(String email, String password, String name, double weight) async {
+  Future<bool> sendSignInLink(String email) async {
     _setLoading(true);
     _setError(null);
-
     try {
-      await _auth.createUserWithEmailAndPassword(email: email, password: password);
-      await register(name, weight);
-      await _saveToFirestore();
+      final actionCodeSettings = ActionCodeSettings(
+        url: 'https://drink-water-a5f9e.web.app/finishSignIn',
+        handleCodeInApp: true,
+        androidPackageName: 'com.example.drink_water',
+        androidInstallApp: true,
+        androidMinimumVersion: '21',
+      );
+      await _auth.sendSignInLinkToEmail(
+        email: email,
+        actionCodeSettings: actionCodeSettings,
+      );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('pending_email', email);
       return true;
     } on FirebaseAuthException catch (e) {
-      _setError(_translateFirebaseError(e.code));
-      return false;
-    } catch (e) {
-      _setError("Неизвестная ошибка при регистрации");
+      _setError(translateFirebaseError(e.code));
       return false;
     } finally {
       _setLoading(false);
@@ -183,29 +165,68 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
   }
 
   @override
-  Future<bool> signIn(String email, String password) async {
+  Future<bool> signInWithLink(String emailLink) async {
     _setLoading(true);
     _setError(null);
-
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-      await loadFromFirestore();
+      final prefs = await SharedPreferences.getInstance();
+      final email = prefs.getString('pending_email');
+      if (email == null) {
+        _setError('Email не найден. Введите email и запросите ссылку заново.');
+        return false;
+      }
+      if (!_auth.isSignInWithEmailLink(emailLink)) {
+        _setError('Неверная ссылка');
+        return false;
+      }
+      await _auth.signInWithEmailLink(email: email, emailLink: emailLink);
+      await prefs.remove('pending_email');
 
-      // Загружаем данные воды и карточек
-      await WaterRepository().loadFromFirestore();
-      await CardRepository().loadFromFirestore();
+      // Firestore в отдельном try-catch — если недоступен, вход всё равно проходит
+      try {
+        final doc = await _firestore.collection('users').doc(_uid).get();
+        if (doc.exists) {
+          await loadFromFirestore();
+          await WaterRepository().loadFromFirestore();
+          await CardRepository().loadFromFirestore();
+        }
+      } catch (e) {
+        // Firestore временно недоступен — не страшно
+        // currentUser останется null, completePendingRegistration отработает
+      }
 
       notifyListeners();
       return true;
     } on FirebaseAuthException catch (e) {
-      _setError(_translateFirebaseError(e.code));
-      return false;
-    } catch (e) {
-      _setError("Неизвестная ошибка при входе");
+      _setError(translateFirebaseError(e.code));
       return false;
     } finally {
       _setLoading(false);
     }
+  }
+
+  // сохраняем имя и вес пока пользователь ждёт ссылку на почте
+  @override
+  Future<void> savePendingRegistration(String name, double weight) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('pending_name', name);
+    await prefs.setDouble('pending_weight', weight);
+  }
+
+  // достаёт сохранённые имя/вес и завершает регистрацию.
+  @override
+  Future<bool> completePendingRegistration() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('pending_name');
+    final weight = prefs.getDouble('pending_weight');
+
+    if (name == null || weight == null) return false;
+
+    await prefs.remove('pending_name');
+    await prefs.remove('pending_weight');
+
+    await register(name, weight);
+    return true;
   }
 
   @override

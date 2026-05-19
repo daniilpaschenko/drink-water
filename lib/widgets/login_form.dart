@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../logic/user_repository.dart';
-import '../screens/home_screen.dart';
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController emailController;
-  final TextEditingController passwordController;
 
   const LoginForm({
     super.key,
     required this.formKey,
     required this.emailController,
-    required this.passwordController,
   });
 
+  @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  bool _linkSent = false;
+
   Future<void> _submit(BuildContext context) async {
-    if (!formKey.currentState!.validate()) return;
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
+    if (!widget.formKey.currentState!.validate()) return;
+    final email = widget.emailController.text.trim();
     final userRepo = context.read<UserRepository>();
-    final success = await userRepo.signIn(email, password);
+    final success = await userRepo.sendSignInLink(email);
     if (!context.mounted) return;
     if (success) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
-      );
+      setState(() => _linkSent = true);
     }
   }
 
@@ -35,9 +34,9 @@ class LoginForm extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenW = MediaQuery.of(context).size.width;
     final titleSize = screenW * 0.05;
+
     return Consumer<UserRepository>(
       builder: (context, userRepo, child) {
-        // показ ошибки через SnackBar
         if (userRepo.errorMessage != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -51,34 +50,63 @@ class LoginForm extends StatelessWidget {
             userRepo.clearError();
           });
         }
+
+        if (_linkSent) {
+          return Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.mark_email_read_outlined, size: screenW * 0.2, color: Colors.blue),
+                SizedBox(height: screenW * 0.06),
+                Text(
+                  "Ссылка отправлена",
+                  style: TextStyle(fontSize: titleSize * 1.1, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: screenW * 0.03),
+                Text(
+                  "Проверьте почту ${widget.emailController.text.trim()} и нажмите на ссылку в письме",
+                  style: TextStyle(fontSize: titleSize * 0.8, color: Colors.grey.shade600),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: screenW * 0.1),
+                TextButton(
+                  onPressed: () => setState(() => _linkSent = false),
+                  child: Text(
+                    "Отправить снова",
+                    style: TextStyle(fontSize: titleSize * 0.8),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Form(
-            key: formKey,
+            key: widget.formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(height: screenW * 0.1),
+                Text(
+                  "Введите email — туда придёт ссылка для входа",
+                  style: TextStyle(fontSize: titleSize * 0.8, color: Colors.grey.shade600),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: screenW * 0.1),
                 TextFormField(
-                  controller: emailController,
+                  controller: widget.emailController,
                   style: TextStyle(fontSize: titleSize),
                   decoration: InputDecoration(
                     labelText: "Email",
                     labelStyle: TextStyle(fontSize: titleSize * 0.8),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (v) => (v == null || !v.contains("@")) ? "Введите корректный email" : null,
-                ),
-                SizedBox(height: screenW * 0.07),
-                TextFormField(
-                  controller: passwordController,
-                  style: TextStyle(fontSize: titleSize),
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: "Пароль",
-                    labelStyle: TextStyle(fontSize: titleSize * 0.8),
-                  ),
-                  validator: (v) => (v == null || v.length < 6) ? "Минимум 6 символов" : null,
+                  validator: (v) =>
+                      (v == null || !v.contains("@")) ? "Введите корректный email" : null,
                 ),
                 SizedBox(height: screenW * 0.12),
                 SizedBox(
@@ -86,18 +114,18 @@ class LoginForm extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: userRepo.isLoading ? null : () => _submit(context),
                     child: userRepo.isLoading
-                    ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                    )
-                    : Text(
-                      "Войти",
-                      style: TextStyle(
-                      fontSize: titleSize * 0.85,
-                      fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                          )
+                        : Text(
+                            "Отправить ссылку",
+                            style: TextStyle(
+                              fontSize: titleSize * 0.85,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],

@@ -1,0 +1,8 @@
+[{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+        "namespace": "android_app",
+        "package_name": "com.example.drink_water",
+        "sha256_cert_fingerprints": ["BC:FF:A0:AE:0E:DB:31:B1:34:8A:A3:3E:22:DB:1C:3F:EC:68:F4:60:36:ED:21:28:07:AD:E8:71:57:95:3F:2E"]
+    }
+}]

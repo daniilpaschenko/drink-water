@@ -3,15 +3,14 @@
 A mobile app for tracking water consumption throughout the day. Developed with Flutter
 
 
-
 ## Screenshots
 
 *will be here soon*
 
 
-
 ## Functionality
 
+- Passwordless authentication via magic link (email)
 - User registration with calculation of daily water intake by formula (weight × 33 ml)
 - Real-time tracking of water consumed with progress bar
 - Water consumption history by day with weekly calendar
@@ -20,7 +19,6 @@ A mobile app for tracking water consumption throughout the day. Developed with F
 - Profile editing - name, weight, daily goal
 - Automatic counter reset to new day
 - Data saving between sessions
-
 
 
 ## Architecture
@@ -63,7 +61,6 @@ lib/
 ```
 
 
-
 ## Technologies
 
 - **Flutter** — UI framework
@@ -73,7 +70,7 @@ lib/
 - **SharedPreferences** — Local storage
 - **percent_indicator** — Progress bar
 - **font_awesome_flutter** — Icons 
-
+- - **app_links** — Deep link handling for magic link authentication
 
 
 ## Development Principles
@@ -82,7 +79,6 @@ lib/
 - Repository Pattern
 - Dependency Injection (Provider)
 - Responsive UI - all sizes are calculated from the screen width
-
 
 
 ## Launching a project
@@ -101,8 +97,7 @@ flutter run
 ```
 
 
-
 ## Coming soon
 
-- Registration via email verification code
 - Push Notifications - Reminders to drink water
+- iOS support ??

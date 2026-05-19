@@ -30,3 +30,20 @@ final List<Map<String, String>> faq = [
     "answer": "Да! На главном экране нажмите карточку 'Новая тара' и введите название и объём. Для удаления — долгое нажатие на карточку."
   },
 ];
+
+String translateFirebaseError(String code) {
+    switch (code) {
+      case 'invalid-email':
+        return 'Неверный формат email';
+      case 'too-many-requests':
+        return 'Слишком много попыток. Попробуйте позже';
+      case 'network-request-failed':
+        return 'Проблема с подключением к интернету';
+      case 'expired-action-code':
+        return 'Ссылка устарела. Запросите новую';
+      case 'invalid-action-code':
+        return 'Неверная или уже использованная ссылка';
+      default:
+        return 'Ошибка: $code';
+    }
+  }

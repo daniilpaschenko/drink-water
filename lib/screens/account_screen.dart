@@ -7,6 +7,7 @@ import '../widgets/editable_field.dart';
 import '../logic/user_repository.dart';
 // import '../logic/water_repository.dart';
 import 'auth_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -176,6 +177,14 @@ class _AccountScreenState extends State<AccountScreen> {
                     },
                   ),
                 ],
+              ),
+
+              SizedBox(height: screenW * 0.1),
+
+              Text(
+                "Почта: ${FirebaseAuth.instance.currentUser?.email ?? '—'}",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: titleSize)
               ),
 
               SizedBox(height: screenW * 0.1),

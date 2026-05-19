@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../logic/user_repository.dart';
-import '../logic/card_repository.dart';
-import '../screens/home_screen.dart';
 
-class RegisterForm extends StatelessWidget {
+class RegisterForm extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController nameController;
   final TextEditingController weightController;
   final TextEditingController emailController;
-  final TextEditingController passwordController;
 
   const RegisterForm({
     super.key,
@@ -18,34 +15,29 @@ class RegisterForm extends StatelessWidget {
     required this.nameController,
     required this.weightController,
     required this.emailController,
-    required this.passwordController,
   });
 
+  @override
+  State<RegisterForm> createState() => _RegisterFormState();
+}
+
+class _RegisterFormState extends State<RegisterForm> {
+  bool _linkSent = false;
+
   Future<void> _submit(BuildContext context) async {
-    if (!formKey.currentState!.validate()) return;
+    if (!widget.formKey.currentState!.validate()) return;
 
-    final name = nameController.text.trim();
-    final weight = double.parse(weightController.text.trim().replaceAll(',', '.'));
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
+    final name = widget.nameController.text.trim();
+    final weight = double.parse(widget.weightController.text.trim().replaceAll(',', '.'));
+    final email = widget.emailController.text.trim();
     final userRepo = context.read<UserRepository>();
-    final cardRepo = context.read<CardRepository>();
-    final success = await userRepo.signUp(email, password, name, weight);
-    if (!context.mounted) return;
 
-    if (success) {
-      // стандартные карточки, если их ещё нет
-      if (cardRepo.customCards.isEmpty) {
-        await cardRepo.addDefaultCards();
-      }
-      if (!context.mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
-      );
-    }
-    // ошибка через Consumer ниже
+    // Сохраняем имя и вес — они понадобятся когда придёт ссылка
+    await userRepo.savePendingRegistration(name, weight);
+
+    final success = await userRepo.sendSignInLink(email);
+    if (!context.mounted) return;
+    if (success) setState(() => _linkSent = true);
   }
 
   @override
@@ -69,34 +61,70 @@ class RegisterForm extends StatelessWidget {
           });
         }
 
+        if (_linkSent) {
+          return Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.mark_email_read_outlined,
+                    size: screenW * 0.2, color: Colors.blue),
+                SizedBox(height: screenW * 0.06),
+                Text(
+                  "Ссылка отправлена!",
+                  style: TextStyle(
+                      fontSize: titleSize * 1.1, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: screenW * 0.03),
+                Text(
+                  "Проверьте почту ${widget.emailController.text.trim()} и нажмите на ссылку — аккаунт создастся автоматически.",
+                  style: TextStyle(
+                      fontSize: titleSize * 0.8, color: Colors.grey.shade600),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: screenW * 0.1),
+                TextButton(
+                  onPressed: () => setState(() => _linkSent = false),
+                  child: Text("Отправить снова",
+                      style: TextStyle(fontSize: titleSize * 0.8)),
+                ),
+              ],
+            ),
+          );
+        }
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Form(
-            key: formKey,
+            key: widget.formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
-                  controller: nameController,
+                  controller: widget.nameController,
                   style: TextStyle(fontSize: titleSize),
                   decoration: InputDecoration(
                     labelText: "Имя",
                     labelStyle: TextStyle(fontSize: titleSize * 0.8),
                   ),
                   inputFormatters: [LengthLimitingTextInputFormatter(16)],
-                  validator: (v) => (v == null || v.trim().isEmpty) ? "Введите имя" : null,
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? "Введите имя" : null,
                 ),
                 SizedBox(height: screenW * 0.06),
-
                 TextFormField(
-                  controller: weightController,
+                  controller: widget.weightController,
                   style: TextStyle(fontSize: titleSize),
                   decoration: InputDecoration(
                     labelText: "Вес (кг)",
                     labelStyle: TextStyle(fontSize: titleSize * 0.8),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))
+                  ],
                   validator: (v) {
                     final n = double.tryParse(v?.replaceAll(',', '.') ?? "");
                     if (n == null || n < 20 || n > 300) {
@@ -106,48 +134,38 @@ class RegisterForm extends StatelessWidget {
                   },
                 ),
                 SizedBox(height: screenW * 0.06),
-
                 TextFormField(
-                  controller: emailController,
+                  controller: widget.emailController,
                   style: TextStyle(fontSize: titleSize),
                   decoration: InputDecoration(
                     labelText: "Email",
                     labelStyle: TextStyle(fontSize: titleSize * 0.8),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (v) => (v == null || !v.contains("@")) ? "Введите корректный email" : null,
-                ),
-                SizedBox(height: screenW * 0.06),
-
-                TextFormField(
-                  controller: passwordController,
-                  style: TextStyle(fontSize: titleSize),
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: "Пароль",
-                    labelStyle: TextStyle(fontSize: titleSize * 0.8),
-                  ),
-                  validator: (v) => (v == null || v.length < 6) ? "Минимум 6 символов" : null,
+                  validator: (v) => (v == null || !v.contains("@"))
+                      ? "Введите корректный email"
+                      : null,
                 ),
                 SizedBox(height: screenW * 0.1),
-
                 SizedBox(
                   height: screenW * 0.08,
                   child: ElevatedButton(
-                    onPressed: userRepo.isLoading ? null : () => _submit(context),
+                    onPressed:
+                        userRepo.isLoading ? null : () => _submit(context),
                     child: userRepo.isLoading
-                    ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                    )
-                    : Text(
-                      "Зарегистрироваться",
-                      style: TextStyle(
-                      fontSize: titleSize * 0.8,
-                      fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 3),
+                          )
+                        : Text(
+                            "Зарегистрироваться",
+                            style: TextStyle(
+                              fontSize: titleSize * 0.8,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],
