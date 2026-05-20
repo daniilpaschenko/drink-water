@@ -70,7 +70,7 @@ lib/
 - **SharedPreferences** — Local storage
 - **percent_indicator** — Progress bar
 - **font_awesome_flutter** — Icons 
-- - **app_links** — Deep link handling for magic link authentication
+- **app_links** — Deep link handling for magic link authentication
 
 
 ## Development Principles
