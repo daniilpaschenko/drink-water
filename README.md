@@ -1,6 +1,6 @@
-# Drink Water
+**[Читать на русском языке](README.ru.md)**
 
-[Читать на русском языке](README.ru.md)
+# Drink Water
 
 A mobile app for tracking water consumption throughout the day. Developed with Flutter
 

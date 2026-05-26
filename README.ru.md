@@ -1,6 +1,6 @@
-# Drink Water
+**[Read this in English](README.md)**
 
-[Read this in English](README.md)
+# Drink Water
 
 Мобильное приложение для отслеживания потребления воды в течение дня. Разработано с использованием Flutter
 
