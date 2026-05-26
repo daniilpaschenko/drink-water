@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../logic/card_repository.dart';
 import '../widgets/water_card.dart';
 import '../core/constants.dart';
+import '../l10n/app_localizations.dart';
 
 class WaterCardsGrid extends StatelessWidget {
   final Function(dynamic card) onCardTap;
@@ -14,8 +15,8 @@ class WaterCardsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardRepo = context.watch<CardRepository>();
+    final loc = AppLocalizations.of(context)!;
     double screenW = MediaQuery.of(context).size.width;
-    // double titleSize = screenW * 0.04;
 
     return GridView.count(
       crossAxisCount: 2,
@@ -27,11 +28,11 @@ class WaterCardsGrid extends StatelessWidget {
         ...cardRepo.customCards.asMap().entries.map((entry) {
           final index = entry.key;
           final card = entry.value;
-          final ml = (card.liters * 1000).toInt();
+          final amount = (card.liters * 1000).toInt().toString();
 
           return WaterCard(
             title: card.title,
-            value: "$ml мл",
+            value: loc.ml(amount),
             icon: appIcons[card.iconName] ?? FontAwesomeIcons.glassWater,
             color: Colors.blue,
             onTap: () => onCardTap(card),
@@ -39,8 +40,8 @@ class WaterCardsGrid extends StatelessWidget {
           );
         }),
         WaterCard(
-          title: "Новая тара",
-          value: "Жми сюда",
+          title: loc.newContainer,
+          value: loc.tapHere,
           icon: FontAwesomeIcons.plus,
           color: Colors.red,
           onTap: () => _showAddCardDialog(context),
@@ -51,28 +52,29 @@ class WaterCardsGrid extends StatelessWidget {
 
   void _showDeleteDialog(BuildContext context, String title, int index) {
     final cardRepo = context.read<CardRepository>();
+    final loc = AppLocalizations.of(context)!;
     double screenW = MediaQuery.of(context).size.width;
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         actionsAlignment: MainAxisAlignment.spaceBetween,
-        title: Text("Удалить карточку?", 
-            textAlign: TextAlign.center, 
+        title: Text(loc.deleteCard,
+            textAlign: TextAlign.center,
             style: TextStyle(fontSize: screenW * 0.04)),
-        content: Text("Вы уверены что хотите удалить '$title'?", 
+        content: Text(loc.confirmDeleteCard(title),
             style: TextStyle(fontSize: screenW * 0.04)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Отмена", style: TextStyle(fontSize: screenW * 0.04)),
+            child: Text(loc.cancel, style: TextStyle(fontSize: screenW * 0.04)),
           ),
           TextButton(
             onPressed: () async {
               await cardRepo.removeCard(index);
               if (context.mounted) Navigator.pop(context);
             },
-            child: Text("Удалить", 
+            child: Text(loc.delete,
                 style: TextStyle(color: Colors.red, fontSize: screenW * 0.04)),
           ),
         ],
@@ -81,18 +83,20 @@ class WaterCardsGrid extends StatelessWidget {
   }
 
   void _showAddCardDialog(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     double screenW = MediaQuery.of(context).size.width;
     double titleSize = screenW * 0.05;
     final titleController = TextEditingController();
     final mlController = TextEditingController();
     final formKey = GlobalKey<FormState>();
-    String selectedIcon = "glass"; // дефолтная иконка
+    String selectedIcon = "glass";
     final cardRepo = context.read<CardRepository>();
+
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder( // нужен чтобы dropdown обновлялся внутри диалога
+      builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text("Новая тара", style: TextStyle(fontSize: titleSize * 1.2)),
+          title: Text(loc.newContainer, style: TextStyle(fontSize: titleSize * 1.2)),
           content: Form(
             key: formKey,
             child: Column(
@@ -100,29 +104,36 @@ class WaterCardsGrid extends StatelessWidget {
               children: [
                 TextFormField(
                   controller: titleController,
-                  decoration: InputDecoration(labelText: "Название", labelStyle: TextStyle(fontSize: titleSize * 0.75)),
+                  decoration: InputDecoration(
+                      labelText: loc.cardTitle,
+                      labelStyle: TextStyle(fontSize: titleSize * 0.75)),
                   style: TextStyle(fontSize: titleSize),
                   inputFormatters: [LengthLimitingTextInputFormatter(16)],
-                  validator: (v) => (v == null || v.trim().isEmpty) ? "Введите название" : null,
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? loc.enterTitle : null,
                 ),
                 SizedBox(height: screenW * 0.03),
                 TextFormField(
                   controller: mlController,
-                  decoration: InputDecoration(labelText: "Количество (мл)", labelStyle: TextStyle(fontSize: titleSize * 0.75)),
+                  decoration: InputDecoration(
+                      labelText: loc.amountMl,
+                      labelStyle: TextStyle(fontSize: titleSize * 0.75)),
                   style: TextStyle(fontSize: titleSize),
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   validator: (v) {
                     final n = int.tryParse(v ?? "");
-                    if (n == null || n < 10 || n > 5000) return "Введите от 10 до 5000 мл";
+                    if (n == null || n < 10 || n > 5000) return loc.invalidMl;
                     return null;
                   },
                 ),
                 SizedBox(height: screenW * 0.03),
                 DropdownButtonFormField<String>(
                   initialValue: selectedIcon,
-                  decoration: InputDecoration(labelText: "Иконка", labelStyle: TextStyle(fontSize: titleSize * 0.75)),
-                  items: iconLabels.entries.map((e) => DropdownMenuItem(
+                  decoration: InputDecoration(
+                      labelText: loc.icon,
+                      labelStyle: TextStyle(fontSize: titleSize * 0.75)),
+                  items: getIconLabels(loc).entries.map((e) => DropdownMenuItem(
                     value: e.key,
                     child: Row(
                       children: [
@@ -140,7 +151,7 @@ class WaterCardsGrid extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Отмена", style: TextStyle(fontSize: titleSize * 0.75)),
+              child: Text(loc.cancel, style: TextStyle(fontSize: titleSize * 0.75)),
             ),
             TextButton(
               onPressed: () async {
@@ -151,7 +162,7 @@ class WaterCardsGrid extends StatelessWidget {
                   if (context.mounted) Navigator.of(context).pop();
                 }
               },
-              child: Text("Добавить", style: TextStyle(fontSize: titleSize * 0.75)),
+              child: Text(loc.add, style: TextStyle(fontSize: titleSize * 0.75)),
             ),
           ],
         ),

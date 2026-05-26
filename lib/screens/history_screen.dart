@@ -4,6 +4,7 @@ import '../widgets/appbar.dart';
 import '../logic/user_repository.dart';
 import '../logic/water_repository.dart';
 import '../widgets/week_calendar.dart';
+import '../l10n/app_localizations.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -44,6 +45,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final user = context.watch<UserRepository>().currentUser!;
     final waterRepo = context.watch<WaterRepository>();
 
+  final loc = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: buildMainAppBar(context: context, isHistoryEnabled: false),
       body: SingleChildScrollView(
@@ -80,7 +83,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
               SizedBox(height: screenW * 0.05),
               Text(
-                "${_getLitersForDate(_selectedDate, waterRepo).toStringAsFixed(2)} л",
+                "${_getLitersForDate(_selectedDate, waterRepo).toStringAsFixed(2)} ${loc.unitL}",
                 style: TextStyle(
                   fontSize: screenW * 0.15,
                   fontWeight: FontWeight.bold,
@@ -89,7 +92,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
               SizedBox(height: screenW * 0.02),
               Text(
-                "из ${user.dailyGoal.toStringAsFixed(2)} л",
+                "${loc.outOf} ${user.dailyGoal.toStringAsFixed(2)} ${loc.unitL}",
                 style: TextStyle(fontSize: titleSize, color: Colors.grey),
               ),
               SizedBox(height: screenW * 0.05),

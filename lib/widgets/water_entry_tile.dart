@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../models/water_entry.dart';
+import '../l10n/app_localizations.dart';
 
 class WaterEntryTile extends StatelessWidget {
   final WaterEntry entry;
@@ -20,6 +21,7 @@ class WaterEntryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     double screenW = MediaQuery.of(context).size.width;
     double titleSize = screenW * 0.04;
+    final loc = AppLocalizations.of(context)!;
     final icon = iconMap[entry.iconName] ?? FontAwesomeIcons.droplet;
     final time = "${entry.time.hour.toString().padLeft(2, '0')}:${entry.time.minute.toString().padLeft(2, '0')}";
     final ml = (entry.liters * 1000).toInt();
@@ -40,7 +42,7 @@ class WaterEntryTile extends StatelessWidget {
           // название и объём
           Expanded(
             child: Text(
-              "${entry.cardTitle} — $ml мл",
+              "${entry.cardTitle} — $ml ${loc.unitMl}",
               style: TextStyle(fontSize: titleSize),
             ),
           ),

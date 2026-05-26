@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/register_form.dart';
+import '../l10n/app_localizations.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -24,9 +25,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Регистрация"),
+        title: Text(loc.register),
         centerTitle: true,
       ),
       body: RegisterForm(

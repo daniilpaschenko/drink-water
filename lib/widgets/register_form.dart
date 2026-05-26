@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../logic/user_repository.dart';
+import '../l10n/app_localizations.dart';
 
 class RegisterForm extends StatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -32,7 +33,6 @@ class _RegisterFormState extends State<RegisterForm> {
     final email = widget.emailController.text.trim();
     final userRepo = context.read<UserRepository>();
 
-    // Сохраняем имя и вес — они понадобятся когда придёт ссылка
     await userRepo.savePendingRegistration(name, weight);
 
     final success = await userRepo.sendSignInLink(email);
@@ -44,6 +44,7 @@ class _RegisterFormState extends State<RegisterForm> {
   Widget build(BuildContext context) {
     final screenW = MediaQuery.of(context).size.width;
     final titleSize = screenW * 0.05;
+    final loc = AppLocalizations.of(context)!;
 
     return Consumer<UserRepository>(
       builder: (context, userRepo, child) {
@@ -71,14 +72,14 @@ class _RegisterFormState extends State<RegisterForm> {
                     size: screenW * 0.2, color: Colors.blue),
                 SizedBox(height: screenW * 0.06),
                 Text(
-                  "Ссылка отправлена!",
+                  loc.linkSent,
                   style: TextStyle(
                       fontSize: titleSize * 1.1, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: screenW * 0.03),
                 Text(
-                  "Проверьте почту ${widget.emailController.text.trim()} и нажмите на ссылку — аккаунт создастся автоматически.",
+                  loc.checkEmailRegister(widget.emailController.text.trim()),
                   style: TextStyle(
                       fontSize: titleSize * 0.8, color: Colors.grey.shade600),
                   textAlign: TextAlign.center,
@@ -86,7 +87,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 SizedBox(height: screenW * 0.1),
                 TextButton(
                   onPressed: () => setState(() => _linkSent = false),
-                  child: Text("Отправить снова",
+                  child: Text(loc.sendAgain,
                       style: TextStyle(fontSize: titleSize * 0.8)),
                 ),
               ],
@@ -105,19 +106,19 @@ class _RegisterFormState extends State<RegisterForm> {
                   controller: widget.nameController,
                   style: TextStyle(fontSize: titleSize),
                   decoration: InputDecoration(
-                    labelText: "Имя",
+                    labelText: loc.name,
                     labelStyle: TextStyle(fontSize: titleSize * 0.8),
                   ),
                   inputFormatters: [LengthLimitingTextInputFormatter(16)],
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? "Введите имя" : null,
+                      (v == null || v.trim().isEmpty) ? loc.enterName : null,
                 ),
                 SizedBox(height: screenW * 0.06),
                 TextFormField(
                   controller: widget.weightController,
                   style: TextStyle(fontSize: titleSize),
                   decoration: InputDecoration(
-                    labelText: "Вес (кг)",
+                    labelText: "${loc.weight} (${loc.kg})",
                     labelStyle: TextStyle(fontSize: titleSize * 0.8),
                   ),
                   keyboardType:
@@ -128,7 +129,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   validator: (v) {
                     final n = double.tryParse(v?.replaceAll(',', '.') ?? "");
                     if (n == null || n < 20 || n > 300) {
-                      return "Введите корректный вес (20–300 кг)";
+                      return loc.invalidWeight;
                     }
                     return null;
                   },
@@ -138,12 +139,12 @@ class _RegisterFormState extends State<RegisterForm> {
                   controller: widget.emailController,
                   style: TextStyle(fontSize: titleSize),
                   decoration: InputDecoration(
-                    labelText: "Email",
+                    labelText: loc.email,
                     labelStyle: TextStyle(fontSize: titleSize * 0.8),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) => (v == null || !v.contains("@"))
-                      ? "Введите корректный email"
+                      ? loc.invalidEmail
                       : null,
                 ),
                 SizedBox(height: screenW * 0.1),
@@ -160,7 +161,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                 color: Colors.white, strokeWidth: 3),
                           )
                         : Text(
-                            "Зарегистрироваться",
+                            loc.register,
                             style: TextStyle(
                               fontSize: titleSize * 0.8,
                               fontWeight: FontWeight.bold,

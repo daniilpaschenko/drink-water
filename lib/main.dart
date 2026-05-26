@@ -6,6 +6,9 @@ import 'screens/home_screen.dart';
 import 'logic/user_repository.dart';
 import 'logic/water_repository.dart';
 import 'logic/card_repository.dart';
+import 'logic/locale_provider.dart';
+import 'l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -27,6 +30,7 @@ void main() async {
         ChangeNotifierProvider<UserRepository>.value(value: userRepo),
         ChangeNotifierProvider<WaterRepository>.value(value: waterRepo),
         ChangeNotifierProvider<CardRepository>.value(value: cardRepo),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ],
       child: const MainApp(),
     ),
@@ -85,7 +89,8 @@ class _MainAppState extends State<MainApp> {
       if (registered) {
         // Были сохранены имя/вес — регистрация завершена, на главную
         if (cardRepo.customCards.isEmpty) {
-          await cardRepo.addDefaultCards();
+          final loc = AppLocalizations.of(_navigatorKey.currentContext!)!;
+          await cardRepo.addDefaultCards(loc);
         }
         if (!mounted) return;
         _navigatorKey.currentState?.pushAndRemoveUntil(
@@ -105,16 +110,33 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    final userRepo = context.watch<UserRepository>();
-
-    return MaterialApp(
-      navigatorKey: _navigatorKey,
-      theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Rubik',
-      ),
-      title: 'Drink Water',
-      home: userRepo.isLoggedIn ? const HomeScreen() : const AuthScreen(),
+    
+    return Consumer<LocaleProvider>(
+      builder: (context, localeProvider, child) {
+        return MaterialApp(
+          navigatorKey: _navigatorKey,
+          theme: ThemeData(
+            useMaterial3: true,
+            fontFamily: 'Rubik',
+          ),
+          title: 'Drink Water',
+          // ЛОКАЛИЗАЦИЯ
+          locale: localeProvider.currentLocale,
+          supportedLocales: const [
+            Locale('ru'),
+            Locale('en'),
+          ],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: context.watch<UserRepository>().isLoggedIn 
+              ? const HomeScreen() 
+              : const AuthScreen(),
+        );
+      },
     );
   }
 }

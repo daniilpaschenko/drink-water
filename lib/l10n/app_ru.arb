@@ -1,0 +1,107 @@
+{
+    "@@locale": "ru",
+    "appTitle": "Drink Water",
+    "name": "Name",
+    "weight": "Вес",
+    "kg": "кг",
+    "dailyGoal": "Дневная цель",
+    "unitL": "л",
+    "email": "Почта",
+    "wantToLogout": "Вы уверены, что хотите выйти из аккаунта?",
+    "cancel": "Отмена",
+    "logout": "Выйти",
+    "logoutFromAccount": "Выйти из аккаунта",
+    "welcome": "Добро пожаловать!",
+    "register": "Зарегистрироваться",
+    "login": "Войти",
+    "outOf": "из",
+    "success": "Успешно!",
+    "aboutApp": "О приложении",
+    "aboutAppText": " — приложение для отслеживания потребления воды. Оно помогает следить за дневной нормой, добавляя выпитое количество воды.",
+    "dailyGoalFormula": "Формула дневной нормы",
+    "formulaRule": "Норма = вес (кг) × 33 мл",
+    "formulaExample": "Например, при весе 70 кг:\n70 × 33 = 2310 мл = 2.31 л",
+    "formulaLimits": "Минимальная норма: 1.5 л\nМаксимальная норма: 4 л",
+    "faq": "Частые вопросы",
+    "devContacts": "Контакты разработчика",
+    "drinkWaterSlogan": "Пейте воду — будете здоровы",
+    "telegram": "Telegram: @daniil_paschenko",
+    "github": "GitHub: github.com/daniilpaschenko",
+    "addWaterPrompt": "Добавьте выпитое количество воды:",
+    "longPressToDelete": "(Долгое нажатие на карточку удаляет её)",
+    "todayEntries": "Записи за сегодня",
+    "hello": "Привет",
+    "drankToday": "Сегодня Вы выпили",
+    "linkSent": "Ссылка отправлена",
+    "checkEmail": "Проверьте почту {email} и нажмите на ссылку в письме",
+    "@checkEmail": {
+        "placeholders": {
+            "email": {
+                "type": "String"
+            }
+        }
+    },
+    "sendAgain": "Отправить снова",
+    "enterEmailHint": "Введите email — туда придёт ссылка для входа",
+    "sendLink": "Отправить ссылку",
+    "invalidEmail": "Введите корректный email",
+    "checkEmailRegister": "Проверьте почту {email} и нажмите на ссылку — аккаунт создастся автоматически.",
+    "@checkEmailRegister": {
+        "placeholders": {
+            "email": {
+                "type": "String"
+            }
+        }
+    },
+    "enterName": "Введите имя",
+    "invalidWeight": "Введите корректный вес (20–300 кг)",
+    "ml": "{amount} мл",
+    "@ml": {
+        "placeholders": {
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "newContainer": "Новая тара",
+    "tapHere": "Жми сюда",
+    "deleteCard": "Удалить карточку?",
+    "confirmDeleteCard": "Вы уверены что хотите удалить '{title}'?",
+    "@confirmDeleteCard": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "delete": "Удалить",
+    "cardTitle": "Название",
+    "enterTitle": "Введите название",
+    "amountMl": "Количество (мл)",
+    "invalidMl": "Введите от 10 до 5000 мл",
+    "icon": "Иконка",
+    "add": "Добавить",
+    "unitMl": "мл",
+    "weekMon": "Пн",
+    "weekTue": "Вт",
+    "weekWed": "Ср",
+    "weekThu": "Чт",
+    "weekFri": "Пт",
+    "weekSat": "Сб",
+    "weekSun": "Вс",
+    "iconDroplet": "Капля",
+    "iconGlass": "Стакан",
+    "iconBottle": "Бутылка",
+    "iconMug": "Кружка",
+    "iconBucket": "Ведро",
+    "iconPlate": "Тарелка",
+    "faqQuestion1": "Как работает счётчик воды?",
+    "faqAnswer1": "Счётчик выпитой воды сбрасывается автоматически каждый день в полночь.",
+    "faqQuestion2": "Можно ли добавить свою тару?",
+    "faqAnswer2": "Да! На главном экране нажмите карточку 'Новая тара' и введите название и объём. Для удаления — долгое нажатие на карточку.",
+    "defaultCardGlass": "Стакан",
+    "defaultCardBottle": "Бутылка",
+    "chooseLanguage": "Выберите свой язык",
+    "russian": "Русский",
+    "english": "Английский"
+}

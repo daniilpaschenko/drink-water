@@ -8,6 +8,7 @@ import '../logic/user_repository.dart';
 // import '../logic/water_repository.dart';
 import 'auth_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../l10n/app_localizations.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -102,6 +103,8 @@ class _AccountScreenState extends State<AccountScreen> {
     final user = userRepo.currentUser!;
     // final waterRepo = context.watch<WaterRepository>();
 
+    final loc = AppLocalizations.of(context)!;
+
     double screenW = MediaQuery.of(context).size.width;
     double titleSize = screenW * 0.04;
 
@@ -117,8 +120,8 @@ class _AccountScreenState extends State<AccountScreen> {
               SizedBox(height: screenW * 0.05),
 
               EditableField(
-                label: "Имя",
-                value: "Имя: ${user.name}",
+                label: loc.name,
+                value: "${loc.name}: ${user.name}",
                 isEditing: _editingName,
                 controller: _nameController,
                 onEdit: () => setState(() => _editingName = true),
@@ -130,8 +133,8 @@ class _AccountScreenState extends State<AccountScreen> {
               SizedBox(height: screenW * 0.01),
 
               EditableField(
-                label: "Вес (кг)",
-                value: "Вес: ${user.weight.toStringAsFixed(1)} кг",
+                label: "${loc.weight} (${loc.kg})",
+                value: "${loc.weight}: ${user.weight.toStringAsFixed(1)} кг",
                 isEditing: _editingWeight,
                 controller: _weightController,
                 onEdit: () => setState(() => _editingWeight = true),
@@ -154,12 +157,12 @@ class _AccountScreenState extends State<AccountScreen> {
                             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
                             style: TextStyle(fontSize: titleSize),
                             decoration: InputDecoration(
-                              labelText: "Дневная цель (л)",
+                              labelText: "${loc.dailyGoal} (${loc.unitL})",
                               labelStyle: TextStyle(fontSize: titleSize * 0.75),
                             ),
                           )
                         : Text(
-                            "Дневная цель: ${user.dailyGoal.toStringAsFixed(2)} л",
+                            "${loc.dailyGoal}: ${user.dailyGoal.toStringAsFixed(2)} ${loc.unitL}",
                             style: TextStyle(fontSize: titleSize),
                           ),
                   ),
@@ -182,7 +185,7 @@ class _AccountScreenState extends State<AccountScreen> {
               SizedBox(height: screenW * 0.1),
 
               Text(
-                "Почта: ${FirebaseAuth.instance.currentUser?.email ?? '—'}",
+                "${loc.email}: ${FirebaseAuth.instance.currentUser?.email ?? '—'}",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: titleSize)
               ),
@@ -198,17 +201,17 @@ class _AccountScreenState extends State<AccountScreen> {
                     context: context,
                     builder: (_) => AlertDialog(
                       content: Text(
-                        "Вы уверены, что хотите выйти из аккаунта?",
+                        loc.wantToLogout,
                         style: TextStyle(fontSize: screenW * 0.04),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: Text("Отмена", style: TextStyle(fontSize: screenW * 0.04)),
+                          child: Text(loc.cancel, style: TextStyle(fontSize: screenW * 0.04)),
                         ),
                         TextButton(
                           onPressed: _logout,
-                          child: Text("Выйти", 
+                          child: Text(loc.logout, 
                               style: TextStyle(fontSize: screenW * 0.04, color: Colors.red)),
                         ),
                       ],
@@ -216,7 +219,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   child: Text(
-                    "Выйти из аккаунта",
+                    loc.logoutFromAccount,
                     style: TextStyle(fontSize: titleSize, color: Colors.white),
                   ),
                 ),

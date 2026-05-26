@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/login_form.dart';
+import '../l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,9 +21,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Вход"),
+        title: Text(loc.login),
         centerTitle: true,
       ),
       body: LoginForm(

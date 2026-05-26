@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/custom_card.dart';
+import '../l10n/app_localizations.dart';
 
 abstract class ICardRepository {
   List<BaseCard> get customCards;
@@ -13,7 +14,7 @@ abstract class ICardRepository {
   Future<void> load();
   Future<bool> addCard(String title, double liters, String iconName);
   Future<bool> removeCard(int index);
-  Future<bool> addDefaultCards();
+  Future<bool> addDefaultCards(AppLocalizations loc);
   Future<void> clear();
   void clearError();
   Future<void> loadFromFirestore();
@@ -90,7 +91,9 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
       if (doc.exists && doc.data() != null) {
         final data = doc.data()!;
         final cardsData = data["cards"] as List<dynamic>? ?? [];
-        customCards = cardsData.map((e) => CustomCard.fromJson(e as Map<String, dynamic>)).toList();
+        customCards = cardsData
+            .map((e) => CustomCard.fromJson(e as Map<String, dynamic>))
+            .toList();
         await _saveToPrefs();
         notifyListeners();
       }
@@ -108,7 +111,9 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
     try {
       final prefs = await SharedPreferences.getInstance();
       final cardsJson = prefs.getStringList("custom_cards") ?? [];
-      customCards = cardsJson.map((e) => CustomCard.fromJson(jsonDecode(e))).toList();
+      customCards = cardsJson
+          .map((e) => CustomCard.fromJson(jsonDecode(e)))
+          .toList();
       notifyListeners();
     } catch (e) {
       _setError("Ошибка загрузки карточек из локального хранилища");
@@ -122,11 +127,9 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
     _setLoading(true);
     _setError(null);
     try {
-      customCards.add(CustomCard(
-        title: title,
-        liters: liters,
-        iconName: iconName,
-      ));
+      customCards.add(
+        CustomCard(title: title, liters: liters, iconName: iconName),
+      );
       await _saveToPrefs();
       await _saveToFirestore();
       notifyListeners();
@@ -162,20 +165,28 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
   }
 
   @override
-  Future<bool> addDefaultCards() async {
+  Future<bool> addDefaultCards(AppLocalizations loc) async {
     _setLoading(true);
     _setError(null);
     try {
       customCards = [
-        CustomCard(title: "Стакан", liters: 0.25, iconName: 'glass'),
-        CustomCard(title: "Бутылка", liters: 0.5, iconName: 'bottle'),
+        CustomCard(
+          title: loc.defaultCardGlass,
+          liters: 0.25,
+          iconName: 'glass',
+        ),
+        CustomCard(
+          title: loc.defaultCardBottle,
+          liters: 0.5,
+          iconName: 'bottle',
+        ),
       ];
       await _saveToPrefs();
       await _saveToFirestore();
       notifyListeners();
       return true;
     } catch (e) {
-      _setError("Не удалось добавить стандартные карточки");
+      _setError("Failed to add default cards");
       return false;
     } finally {
       _setLoading(false);

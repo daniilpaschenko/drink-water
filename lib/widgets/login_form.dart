@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../logic/user_repository.dart';
+import '../l10n/app_localizations.dart';
 
 class LoginForm extends StatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -34,6 +35,7 @@ class _LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     final screenW = MediaQuery.of(context).size.width;
     final titleSize = screenW * 0.05;
+    final loc = AppLocalizations.of(context)!;
 
     return Consumer<UserRepository>(
       builder: (context, userRepo, child) {
@@ -60,13 +62,13 @@ class _LoginFormState extends State<LoginForm> {
                 Icon(Icons.mark_email_read_outlined, size: screenW * 0.2, color: Colors.blue),
                 SizedBox(height: screenW * 0.06),
                 Text(
-                  "Ссылка отправлена",
+                  loc.linkSent,
                   style: TextStyle(fontSize: titleSize * 1.1, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: screenW * 0.03),
                 Text(
-                  "Проверьте почту ${widget.emailController.text.trim()} и нажмите на ссылку в письме",
+                  loc.checkEmail(widget.emailController.text.trim()),
                   style: TextStyle(fontSize: titleSize * 0.8, color: Colors.grey.shade600),
                   textAlign: TextAlign.center,
                 ),
@@ -74,7 +76,7 @@ class _LoginFormState extends State<LoginForm> {
                 TextButton(
                   onPressed: () => setState(() => _linkSent = false),
                   child: Text(
-                    "Отправить снова",
+                    loc.sendAgain,
                     style: TextStyle(fontSize: titleSize * 0.8),
                   ),
                 ),
@@ -92,7 +94,7 @@ class _LoginFormState extends State<LoginForm> {
               children: [
                 SizedBox(height: screenW * 0.1),
                 Text(
-                  "Введите email — туда придёт ссылка для входа",
+                  loc.enterEmailHint,
                   style: TextStyle(fontSize: titleSize * 0.8, color: Colors.grey.shade600),
                   textAlign: TextAlign.center,
                 ),
@@ -101,12 +103,12 @@ class _LoginFormState extends State<LoginForm> {
                   controller: widget.emailController,
                   style: TextStyle(fontSize: titleSize),
                   decoration: InputDecoration(
-                    labelText: "Email",
+                    labelText: loc.email,
                     labelStyle: TextStyle(fontSize: titleSize * 0.8),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) =>
-                      (v == null || !v.contains("@")) ? "Введите корректный email" : null,
+                      (v == null || !v.contains("@")) ? loc.invalidEmail : null,
                 ),
                 SizedBox(height: screenW * 0.12),
                 SizedBox(
@@ -120,7 +122,7 @@ class _LoginFormState extends State<LoginForm> {
                             child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
                           )
                         : Text(
-                            "Отправить ссылку",
+                            loc.sendLink,
                             style: TextStyle(
                               fontSize: titleSize * 0.85,
                               fontWeight: FontWeight.bold,

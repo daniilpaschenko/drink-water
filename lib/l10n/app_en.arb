@@ -1,0 +1,107 @@
+{
+    "@@locale": "en",
+    "appTitle": "Drink Water",
+    "name": "Name",
+    "weight": "Weight",
+    "kg": "kg",
+    "dailyGoal": "Daily Goal",
+    "unitL": "l",
+    "email": "Email",
+    "wantToLogout": "Are you sure you want to log out of your account?",
+    "cancel": "Cancel",
+    "logout": "Log out",
+    "logoutFromAccount": "Log out of your account",
+    "welcome": "Welcome!",
+    "register": "Register",
+    "login": "Log in",
+    "outOf": "out of",
+    "success": "Success!",
+    "aboutApp": "About the app",
+    "aboutAppText": " — an app for tracking water consumption. It helps you monitor your daily intake by logging the amount of water you drink.",
+    "dailyGoalFormula": "Daily intake formula",
+    "formulaRule": "Intake = weight (kg) × 33 ml",
+    "formulaExample": "For example, at 70 kg:\n70 × 33 = 2310 ml = 2.31 l",
+    "formulaLimits": "Minimum intake: 1.5 l\nMaximum intake: 4 l",
+    "faq": "FAQ",
+    "devContacts": "Developer contacts",
+    "drinkWaterSlogan": "Drink water — stay healthy",
+    "telegram": "Telegram: @daniil_paschenko",
+    "github": "GitHub: github.com/daniilpaschenko",
+    "addWaterPrompt": "Add the amount of water you drank:",
+    "longPressToDelete": "(Long press on a card to delete it)",
+    "todayEntries": "Today's entries",
+    "hello": "Hello",
+    "drankToday": "Today you drank",
+    "linkSent": "Link sent",
+    "checkEmail": "Check your inbox at {email} and click the link in the email",
+    "@checkEmail": {
+        "placeholders": {
+            "email": {
+                "type": "String"
+            }
+        }
+    },
+    "sendAgain": "Send again",
+    "enterEmailHint": "Enter your email — we'll send you a sign-in link",
+    "sendLink": "Send link",
+    "invalidEmail": "Enter a valid email",
+    "checkEmailRegister": "Check your inbox at {email} and click the link — your account will be created automatically.",
+    "@checkEmailRegister": {
+        "placeholders": {
+            "email": {
+                "type": "String"
+            }
+        }
+    },
+    "enterName": "Enter your name",
+    "invalidWeight": "Enter a valid weight (20–300 kg)",
+    "ml": "{amount} ml",
+    "@ml": {
+        "placeholders": {
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "newContainer": "New container",
+    "tapHere": "Tap here",
+    "deleteCard": "Delete card?",
+    "confirmDeleteCard": "Are you sure you want to delete '{title}'?",
+    "@confirmDeleteCard": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "delete": "Delete",
+    "cardTitle": "Title",
+    "enterTitle": "Enter title",
+    "amountMl": "Amount (ml)",
+    "invalidMl": "Enter between 10 and 5000 ml",
+    "icon": "Icon",
+    "add": "Add",
+    "unitMl": "ml",
+    "weekMon": "Mon",
+    "weekTue": "Tue",
+    "weekWed": "Wed",
+    "weekThu": "Thu",
+    "weekFri": "Fri",
+    "weekSat": "Sat",
+    "weekSun": "Sun",
+    "iconDroplet": "Droplet",
+    "iconGlass": "Glass",
+    "iconBottle": "Bottle",
+    "iconMug": "Mug",
+    "iconBucket": "Bucket",
+    "iconPlate": "Bowl",
+    "faqQuestion1": "How does the water counter work?",
+    "faqAnswer1": "The water counter resets automatically every day at midnight.",
+    "faqQuestion2": "Can I add my own container?",
+    "faqAnswer2": "Yes! On the home screen tap the 'New container' card and enter a name and volume. To delete — long press the card.",
+    "defaultCardGlass": "Glass",
+    "defaultCardBottle": "Bottle",
+    "chooseLanguage": "Choose your language",
+    "russian": "Russian",
+    "english": "English"
+}

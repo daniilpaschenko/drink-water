@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class WeekCalendar extends StatelessWidget {
   final DateTime selectedDate;
@@ -14,12 +15,23 @@ class WeekCalendar extends StatelessWidget {
     required this.onCalendarTap,
   });
 
-  final List<String> _weekDays = const ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+  List<String> _weekDays(AppLocalizations loc) => [
+    loc.weekMon,
+    loc.weekTue,
+    loc.weekWed,
+    loc.weekThu,
+    loc.weekFri,
+    loc.weekSat,
+    loc.weekSun,
+  ];
 
   @override
   Widget build(BuildContext context) {
     double screenW = MediaQuery.of(context).size.width;
     double titleSize = screenW * 0.04;
+    final loc = AppLocalizations.of(context)!;
+    final weekDays = _weekDays(loc);
+
     return Column(
       children: [
         SingleChildScrollView(
@@ -51,7 +63,7 @@ class WeekCalendar extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        _weekDays[index],
+                        weekDays[index],
                         style: TextStyle(
                           fontSize: titleSize * 0.8,
                           color: isSelected ? Colors.white : Colors.grey,

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../widgets/appbar.dart'; // appbar из отдельного файла
+import '../widgets/appbar.dart';
 import '../core/constants.dart';
 import '../widgets/info_section.dart';
 import '../widgets/faq_item.dart';
+import '../l10n/app_localizations.dart';
 
 class InfoScreen extends StatelessWidget {
   const InfoScreen({super.key});
@@ -11,6 +12,7 @@ class InfoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     double screenW = MediaQuery.of(context).size.width;
     double titleSize = screenW * 0.04;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: buildMainAppBar(context: context, isInfoEnabled: false),
@@ -22,25 +24,25 @@ class InfoScreen extends StatelessWidget {
               SizedBox(height: screenW * 0.02),
 
               InfoSection(
-                title: "О приложении",
+                title: loc.aboutApp,
                 titleSize: titleSize,
                 screenW: screenW,
-                child: _buildAboutText(titleSize),
+                child: _buildAboutText(titleSize, loc),
               ),
 
               InfoSection(
-                title: "Формула дневной нормы",
+                title: loc.dailyGoalFormula,
                 titleSize: titleSize,
                 screenW: screenW,
-                child: _buildFormulaSection(titleSize, screenW),
+                child: _buildFormulaSection(titleSize, screenW, loc),
               ),
 
               InfoSection(
-                title: "Частые вопросы",
+                title: loc.faq,
                 titleSize: titleSize,
                 screenW: screenW,
                 child: Column(
-                  children: faq.map((item) => FaqItem(
+                  children: getFaq(loc).map((item) => FaqItem(
                     question: item["question"]!,
                     answer: item["answer"]!,
                     titleSize: titleSize,
@@ -50,16 +52,16 @@ class InfoScreen extends StatelessWidget {
               ),
 
               InfoSection(
-                title: "Контакты разработчика",
+                title: loc.devContacts,
                 titleSize: titleSize,
                 screenW: screenW,
-                child: _buildContacts(titleSize),
+                child: _buildContacts(titleSize, loc),
               ),
 
               SizedBox(height: screenW * 0.05),
               Center(
                 child: Text(
-                  "Пейте воду — будете здоровы",
+                  loc.drinkWaterSlogan,
                   style: TextStyle(
                     fontSize: titleSize * 0.75,
                     color: Colors.grey,
@@ -74,7 +76,7 @@ class InfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAboutText(double titleSize) {
+  Widget _buildAboutText(double titleSize, AppLocalizations loc) {
     return RichText(
       textAlign: TextAlign.center,
       text: TextSpan(
@@ -84,37 +86,34 @@ class InfoScreen extends StatelessWidget {
           color: Colors.black,
           fontFamily: 'Rubik',
         ),
-        children: const [
+        children: [
           TextSpan(
-            text: "Drink Water",
-            style: TextStyle(fontWeight: FontWeight.bold),
+            text: loc.appTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          TextSpan(
-            text: " — приложение для отслеживания потребления воды. "
-                "Оно помогает следить за дневной нормой, добавляя выпитое количество воды.",
-          ),
+          TextSpan(text: loc.aboutAppText),
         ],
       ),
     );
   }
 
-  Widget _buildFormulaSection(double titleSize, double screenW) {
+  Widget _buildFormulaSection(double titleSize, double screenW, AppLocalizations loc) {
     return Column(
       children: [
         Text(
-          "Норма = вес (кг) × 33 мл",
+          loc.formulaRule,
           style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
         SizedBox(height: screenW * 0.02),
         Text(
-          "Например, при весе 70 кг:\n70 × 33 = 2310 мл = 2.31 л",
+          loc.formulaExample,
           style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w300),
           textAlign: TextAlign.center,
         ),
         SizedBox(height: screenW * 0.02),
         Text(
-          "Минимальная норма: 1.5 л\nМаксимальная норма: 4 л",
+          loc.formulaLimits,
           style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w300),
           textAlign: TextAlign.center,
         ),
@@ -122,14 +121,14 @@ class InfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContacts(double titleSize) {
+  Widget _buildContacts(double titleSize, AppLocalizations loc) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Telegram: @daniil_paschenko", 
+        Text(loc.telegram,
             style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w300)),
-        SizedBox(height: 12),
-        Text("GitHub: github.com/daniilpaschenko", 
+        const SizedBox(height: 12),
+        Text(loc.github,
             style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w300)),
       ],
     );

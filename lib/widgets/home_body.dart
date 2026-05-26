@@ -6,6 +6,7 @@ import '../widgets/water_progress_bar.dart';
 import '../widgets/water_cards_grid.dart';
 import '../widgets/water_entry_tile.dart';
 import '../core/constants.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeBody extends StatelessWidget {
   final Function(double) onSuccess;
@@ -18,6 +19,8 @@ class HomeBody extends StatelessWidget {
     final waterRepo = context.watch<WaterRepository>();
     // final cardRepo = context.watch<CardRepository>();
     final user = userRepo.currentUser!;
+
+    final loc = AppLocalizations.of(context)!;
 
     double screenW = MediaQuery.of(context).size.width;
     double titleSize = screenW * 0.04;
@@ -40,19 +43,19 @@ class HomeBody extends StatelessWidget {
 
             SizedBox(height: screenW * 0.04),
             Text(
-              "Привет, ${user.name}!\nСегодня Вы выпили ${waterRepo.drankLiters.toStringAsFixed(2)} л из ${user.dailyGoal.toStringAsFixed(2)} л",
+              "${loc.hello}, ${user.name}!\n${loc.drankToday} ${waterRepo.drankLiters.toStringAsFixed(2)} ${loc.unitL} ${loc.outOf} ${user.dailyGoal.toStringAsFixed(2)} ${loc.unitL}",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: titleSize),
             ),
 
             SizedBox(height: screenW * 0.05),
             Text(
-              "Добавьте выпитое количество воды:",
+              loc.addWaterPrompt,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: titleSize),
             ),
             Text(
-              "(Долгое нажатие на карточку удаляет её)",
+              loc.longPressToDelete,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: titleSize * 0.8, fontWeight: FontWeight.w300),
             ),
@@ -72,7 +75,7 @@ class HomeBody extends StatelessWidget {
 
             SizedBox(height: screenW * 0.1),
             Text(
-              "Записи за сегодня",
+              loc.todayEntries,
               style: TextStyle(fontSize: titleSize),
             ),
 

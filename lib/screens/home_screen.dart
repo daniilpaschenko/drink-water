@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../logic/user_repository.dart';
-import '../logic/water_repository.dart';
+// import '../logic/water_repository.dart';
 import '../widgets/appbar.dart';
 import '../widgets/home_body.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,16 +16,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   void _showSuccess(double liters) {
     ScaffoldMessenger.of(context).clearSnackBars();
+    final loc = AppLocalizations.of(context)!;
     final controller = ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text("Успешно!", textAlign: TextAlign.start),
+        content: Text(loc.success, textAlign: TextAlign.center),
         duration: const Duration(seconds: 3),
-        action: SnackBarAction(
-          label: "Отменить",
-          onPressed: () {
-            context.read<WaterRepository>().addWater(-liters);
-          },
-        ),
+
       ),
     );
     Future.delayed(const Duration(seconds: 3), () => controller.close());

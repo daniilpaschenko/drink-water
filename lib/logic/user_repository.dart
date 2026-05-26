@@ -172,11 +172,11 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
       final prefs = await SharedPreferences.getInstance();
       final email = prefs.getString('pending_email');
       if (email == null) {
-        _setError('Email не найден. Введите email и запросите ссылку заново.');
+        _setError('Email not found. Enter your email and request the link again.');
         return false;
       }
       if (!_auth.isSignInWithEmailLink(emailLink)) {
-        _setError('Неверная ссылка');
+        _setError('Invalid link');
         return false;
       }
       await _auth.signInWithEmailLink(email: email, emailLink: emailLink);

@@ -1,4 +1,5 @@
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../l10n/app_localizations.dart';
 
 const Map<String, dynamic> appIcons = {
   "droplet": FontAwesomeIcons.droplet,
@@ -9,41 +10,41 @@ const Map<String, dynamic> appIcons = {
   "plate": FontAwesomeIcons.bowlFood,
 };
 
-const Map<String, String> iconLabels = {
-  "droplet": "Капля",
-  "glass": "Стакан",
-  "bottle": "Бутылка",
-  "mug": "Кружка",
-  "bucket": "Ведро",
-  "plate": "Тарелка",
-};
-
 const defaultIcon = FontAwesomeIcons.glassWater;
 
-final List<Map<String, String>> faq = [
+Map<String, String> getIconLabels(AppLocalizations loc) => {
+  "droplet": loc.iconDroplet,
+  "glass": loc.iconGlass,
+  "bottle": loc.iconBottle,
+  "mug": loc.iconMug,
+  "bucket": loc.iconBucket,
+  "plate": loc.iconPlate,
+};
+
+List<Map<String, String>> getFaq(AppLocalizations loc) => [
   {
-    "question": "Как работает счётчик воды?",
-    "answer": "Счётчик выпитой воды сбрасывается автоматически каждый день в полночь."
+    "question": loc.faqQuestion1,
+    "answer": loc.faqAnswer1,
   },
   {
-    "question": "Можно ли добавить свою тару?",
-    "answer": "Да! На главном экране нажмите карточку 'Новая тара' и введите название и объём. Для удаления — долгое нажатие на карточку."
+    "question": loc.faqQuestion2,
+    "answer": loc.faqAnswer2,
   },
 ];
 
 String translateFirebaseError(String code) {
     switch (code) {
       case 'invalid-email':
-        return 'Неверный формат email';
+        return 'Invalid email format';
       case 'too-many-requests':
-        return 'Слишком много попыток. Попробуйте позже';
+        return 'Too many attempts. Please try again later';
       case 'network-request-failed':
-        return 'Проблема с подключением к интернету';
+        return 'No internet connection';
       case 'expired-action-code':
-        return 'Ссылка устарела. Запросите новую';
+        return 'The link has expired. Please request a new one';
       case 'invalid-action-code':
-        return 'Неверная или уже использованная ссылка';
+        return 'Invalid or already used link';
       default:
-        return 'Ошибка: $code';
+        return 'Error: $code';
     }
   }

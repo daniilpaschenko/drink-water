@@ -1,5 +1,7 @@
 # Drink Water
 
+[Читать на русском языке](README.ru.md)
+
 A mobile app for tracking water consumption throughout the day. Developed with Flutter
 
 
@@ -19,46 +21,7 @@ A mobile app for tracking water consumption throughout the day. Developed with F
 - Profile editing - name, weight, daily goal
 - Automatic counter reset to new day
 - Data saving between sessions
-
-
-## Architecture
-
-The project is based on the **Repository Pattern** with **Provider** as state management.
-
-```
-lib/
-├── core/
-│   └── constants.dart
-├── logic/
-│   ├── user_repository.dart
-│   ├── water_repository.dart
-│   └── card_repository.dart
-├── models/
-│   ├── custom_card.dart
-│   ├── user_data.dart
-│   └── water_entry.dart
-├── screens/
-│   ├── auth_screen.dart
-│   ├── register_screen.dart
-│   ├── home_screen.dart
-│   ├── account_screen.dart
-│   ├── history_screen.dart
-│   ├── info_screen.dart
-│   ├── login_screen.dart
-│   └── settings_screen.dart
-└── widgets/
-    ├── appbar.dart
-    ├── water_card.dart
-    ├── water_progress_bar.dart
-    ├── water_entry_tile.dart
-    ├── week_calendar.dart
-    ├── home_body.dart
-    ├── info_section.dart
-    ├── faq_item.dart
-    ├── login_form.dart
-    ├── register_form.dart
-    └── editable_field.dart
-```
+- Localization - full support for English and Russian languages with dynamic in-app switching
 
 
 ## Technologies
@@ -97,7 +60,47 @@ flutter run
 ```
 
 
-## Coming soon
+## Architecture
 
-- Push Notifications - Reminders to drink water
-- iOS support ??
+The project is based on the **Repository Pattern** with **Provider** as state management.
+
+```
+lib/
+├── core/
+│   └── constants.dart
+├── l10n/
+│   ├── app_en.dart
+│   ├── app_localizations_en.dart
+│   ├── app_localizations_ru.dart
+│   ├── app_localizations.dart
+│   └── app_ru.dart
+├── logic/
+│   ├── user_repository.dart
+│   ├── water_repository.dart
+│   └── card_repository.dart
+├── models/
+│   ├── custom_card.dart
+│   ├── user_data.dart
+│   └── water_entry.dart
+├── screens/
+│   ├── auth_screen.dart
+│   ├── register_screen.dart
+│   ├── home_screen.dart
+│   ├── account_screen.dart
+│   ├── history_screen.dart
+│   ├── info_screen.dart
+│   ├── login_screen.dart
+│   └── settings_screen.dart
+└── widgets/
+    ├── appbar.dart
+    ├── water_card.dart
+    ├── water_progress_bar.dart
+    ├── water_entry_tile.dart
+    ├── week_calendar.dart
+    ├── home_body.dart
+    ├── info_section.dart
+    ├── faq_item.dart
+    ├── login_form.dart
+    ├── register_form.dart
+    └── editable_field.dart
+```
