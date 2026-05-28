@@ -5,8 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/custom_card.dart';
 import '../l10n/app_localizations.dart';
+import 'package:injectable/injectable.dart';
 
-abstract class ICardRepository {
+abstract class ICardRepository extends ChangeNotifier{
   List<BaseCard> get customCards;
   bool get isLoading;
   String? get errorMessage;
@@ -20,10 +21,12 @@ abstract class ICardRepository {
   Future<void> loadFromFirestore();
 }
 
+@LazySingleton(as: ICardRepository)
 class CardRepository extends ChangeNotifier implements ICardRepository {
-  static final CardRepository _instance = CardRepository._internal();
-  factory CardRepository() => _instance;
-  CardRepository._internal();
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+
+  CardRepository(this._auth, this._firestore);
 
   // флаги обработки ошибок
   bool _isLoading = false;
@@ -53,8 +56,6 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
   @override
   List<BaseCard> customCards = [];
 
-  final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
   String? get _uid => _auth.currentUser?.uid;
 
   Future<void> _saveToFirestore() async {
@@ -64,7 +65,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
         "cards": customCards.map((e) => e.toJson()).toList(),
       });
     } catch (e) {
-      _setError("Не удалось сохранить карточки в облако");
+      _setError("Failed to save cards to the cloud");
       rethrow;
     }
   }
@@ -77,7 +78,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
         customCards.map((e) => jsonEncode(e.toJson())).toList(),
       );
     } catch (e) {
-      _setError("Ошибка сохранения карточек локально");
+      _setError("Error saving cards locally");
     }
   }
 
@@ -98,7 +99,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
         notifyListeners();
       }
     } catch (e) {
-      _setError("Не удалось загрузить карточки из облака");
+      _setError("Failed to load cards from the cloud");
     } finally {
       _setLoading(false);
     }
@@ -116,7 +117,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
           .toList();
       notifyListeners();
     } catch (e) {
-      _setError("Ошибка загрузки карточек из локального хранилища");
+      _setError("Error loading cards from local storage");
     } finally {
       _setLoading(false);
     }
@@ -135,7 +136,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
       notifyListeners();
       return true;
     } catch (e) {
-      _setError("Не удалось добавить карточку");
+      _setError("Failed to add card");
       return false;
     } finally {
       _setLoading(false);
@@ -145,7 +146,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
   @override
   Future<bool> removeCard(int index) async {
     if (index < 0 || index >= customCards.length) {
-      _setError("Неверный индекс карточки");
+      _setError("Invalid card index");
       return false;
     }
     _setLoading(true);
@@ -157,7 +158,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
       notifyListeners();
       return true;
     } catch (e) {
-      _setError("Не удалось удалить карточку");
+      _setError("Failed to delete card");
       return false;
     } finally {
       _setLoading(false);
@@ -203,7 +204,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
       await prefs.remove("custom_cards");
       notifyListeners();
     } catch (e) {
-      _setError("Ошибка очистки карточек");
+      _setError("Error clearing cards");
     } finally {
       _setLoading(false);
     }

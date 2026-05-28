@@ -29,7 +29,9 @@ class _RegisterFormState extends State<RegisterForm> {
     if (!widget.formKey.currentState!.validate()) return;
 
     final name = widget.nameController.text.trim();
-    final weight = double.parse(widget.weightController.text.trim().replaceAll(',', '.'));
+    final weight = double.parse(
+      widget.weightController.text.trim().replaceAll(',', '.'),
+    );
     final email = widget.emailController.text.trim();
     final userRepo = context.read<UserRepository>();
 
@@ -68,27 +70,36 @@ class _RegisterFormState extends State<RegisterForm> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.mark_email_read_outlined,
-                    size: screenW * 0.2, color: Colors.blue),
+                Icon(
+                  Icons.mark_email_read_outlined,
+                  size: screenW * 0.2,
+                  color: Colors.blue,
+                ),
                 SizedBox(height: screenW * 0.06),
                 Text(
                   loc.linkSent,
                   style: TextStyle(
-                      fontSize: titleSize * 1.1, fontWeight: FontWeight.bold),
+                    fontSize: titleSize * 1.1,
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: screenW * 0.03),
                 Text(
                   loc.checkEmailRegister(widget.emailController.text.trim()),
                   style: TextStyle(
-                      fontSize: titleSize * 0.8, color: Colors.grey.shade600),
+                    fontSize: titleSize * 0.8,
+                    color: Colors.grey.shade600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: screenW * 0.1),
                 TextButton(
                   onPressed: () => setState(() => _linkSent = false),
-                  child: Text(loc.sendAgain,
-                      style: TextStyle(fontSize: titleSize * 0.8)),
+                  child: Text(
+                    loc.sendAgain,
+                    style: TextStyle(fontSize: titleSize * 0.8),
+                  ),
                 ),
               ],
             ),
@@ -121,10 +132,11 @@ class _RegisterFormState extends State<RegisterForm> {
                     labelText: "${loc.weight} (${loc.kg})",
                     labelStyle: TextStyle(fontSize: titleSize * 0.8),
                   ),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                   ],
                   validator: (v) {
                     final n = double.tryParse(v?.replaceAll(',', '.') ?? "");
@@ -143,22 +155,24 @@ class _RegisterFormState extends State<RegisterForm> {
                     labelStyle: TextStyle(fontSize: titleSize * 0.8),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (v) => (v == null || !v.contains("@"))
-                      ? loc.invalidEmail
-                      : null,
+                  validator: (v) =>
+                      (v == null || !v.contains("@")) ? loc.invalidEmail : null,
                 ),
                 SizedBox(height: screenW * 0.1),
                 SizedBox(
                   height: screenW * 0.08,
                   child: ElevatedButton(
-                    onPressed:
-                        userRepo.isLoading ? null : () => _submit(context),
+                    onPressed: userRepo.isLoading
+                        ? null
+                        : () => _submit(context),
                     child: userRepo.isLoading
                         ? const SizedBox(
                             height: 24,
                             width: 24,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 3),
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
                           )
                         : Text(
                             loc.register,

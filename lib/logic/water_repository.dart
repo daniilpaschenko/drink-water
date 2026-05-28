@@ -4,8 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/water_entry.dart';
+import 'package:injectable/injectable.dart';
 
-abstract class IWaterRepository {
+abstract class IWaterRepository extends ChangeNotifier{
   double get drankLiters;
   Map<String, double> get waterHistory;
   List<WaterEntry> get todayEntries;
@@ -21,10 +22,12 @@ abstract class IWaterRepository {
   Future<void> loadFromFirestore();
 }
 
+@LazySingleton(as: IWaterRepository)
 class WaterRepository extends ChangeNotifier implements IWaterRepository {
-  static final WaterRepository _instance = WaterRepository._internal();
-  factory WaterRepository() => _instance;
-  WaterRepository._internal();
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+
+  WaterRepository(this._auth, this._firestore);
 
   // флаги обработки ошибок
   bool _isLoading = false;
@@ -60,8 +63,6 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
   @override
   List<WaterEntry> todayEntries = [];
 
-  final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
   String? get _uid => _auth.currentUser?.uid;
 
   Future<void> _saveToFirestore() async {
@@ -74,7 +75,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
         "todayEntries": todayEntries.map((e) => e.toJson()).toList(),
       });
     } catch (e) {
-      _setError("Не удалось сохранить данные о воде в облако");
+      _setError("Failed to save water data to the cloud");
       rethrow;
     }
   }
@@ -91,7 +92,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
         jsonEncode(todayEntries.map((e) => e.toJson()).toList()),
       );
     } catch (e) {
-      _setError("Ошибка сохранения данных локально");
+      _setError("Error saving data locally");
     }
   }
 
@@ -118,7 +119,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
       await _saveToPrefs();
       notifyListeners();
     } catch (e) {
-      _setError("Не удалось загрузить данные о воде из облака");
+      _setError("Failed to load water data from the cloud");
     } finally {
       _setLoading(false);
     }
@@ -156,7 +157,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
       }
       notifyListeners();
     } catch (e) {
-      _setError("Ошибка загрузки данных о воде из локального хранилища");
+      _setError("Error loading water data from local storage");
     } finally {
       _setLoading(false);
     }
@@ -165,7 +166,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
   @override
   Future<bool> addWater(double liters, {String cardTitle = "", String iconName = "droplet"}) async {
     if (liters <= 0) {
-      _setError("Объём должен быть больше нуля");
+      _setError("The volume must be greater than zero");
       return false;
     }
     _setLoading(true);
@@ -185,7 +186,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
       notifyListeners();
       return true;
     } catch (e) {
-      _setError("Не удалось добавить запись о воде");
+      _setError("Error adding water record");
       return false;
     } finally {
       _setLoading(false);
@@ -195,7 +196,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
   @override
   Future<bool> removeEntry(int index) async {
     if (index < 0 || index >= todayEntries.length) {
-      _setError("Неверный индекс записи");
+      _setError("Invalid record index");
       return false;
     }
     _setLoading(true);
@@ -212,7 +213,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
       notifyListeners();
       return true;
     } catch (e) {
-      _setError("Не удалось удалить запись");
+      _setError("Error deleting a record");
       return false;
     } finally {
       _setLoading(false);
@@ -233,7 +234,7 @@ class WaterRepository extends ChangeNotifier implements IWaterRepository {
       await prefs.remove("water_history");
       notifyListeners();
     } catch (e) {
-      _setError("Ошибка очистки данных о воде");
+      _setError("Error clearing water data");
     } finally {
       _setLoading(false);
     }

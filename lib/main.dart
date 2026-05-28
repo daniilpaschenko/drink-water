@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:app_links/app_links.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
+import 'core/di/injection.dart';
 import 'logic/user_repository.dart';
 import 'logic/water_repository.dart';
 import 'logic/card_repository.dart';
@@ -10,15 +11,19 @@ import 'logic/locale_provider.dart';
 import 'l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  final userRepo = UserRepository();
-  final waterRepo = WaterRepository();
-  final cardRepo = CardRepository();
+  // инициализация Dependency Injection
+  await configureDependencies();
+
+  // загрузка начальных данных через репозитории
+  final userRepo = getIt<IUserRepository>();
+  final waterRepo = getIt<IWaterRepository>();
+  final cardRepo = getIt<ICardRepository>();
 
   await userRepo.load();
   await waterRepo.load();
@@ -27,9 +32,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<UserRepository>.value(value: userRepo),
-        ChangeNotifierProvider<WaterRepository>.value(value: waterRepo),
-        ChangeNotifierProvider<CardRepository>.value(value: cardRepo),
+        ChangeNotifierProvider<IUserRepository>.value(value: userRepo),
+        ChangeNotifierProvider<IWaterRepository>.value(value: waterRepo),
+        ChangeNotifierProvider<ICardRepository>.value(value: cardRepo),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ],
       child: const MainApp(),
@@ -65,44 +70,14 @@ class _MainAppState extends State<MainApp> {
     });
   }
 
-  Future<void> _handleLink(String link) async {
-    if (!FirebaseAuth.instance.isSignInWithEmailLink(link)) return;
-
-    final userRepo = context.read<UserRepository>();
-    final cardRepo = context.read<CardRepository>();
-
-    final success = await userRepo.signInWithLink(link);
-    if (!mounted || !success) return;
-
-    if (userRepo.isLoggedIn) {
-      // Существующий пользователь — данные уже загружены в signInWithLink
-      _navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
-      );
-    } else {
-      // Новый пользователь — Firebase залогинил, но данных в Firestore нет.
-      // Проверяем есть ли сохранённые имя/вес от регистрации
-      final registered = await userRepo.completePendingRegistration();
-      if (!mounted) return;
-
-      if (registered) {
-        // Были сохранены имя/вес — регистрация завершена, на главную
-        if (cardRepo.customCards.isEmpty) {
-          final loc = AppLocalizations.of(_navigatorKey.currentContext!)!;
-          await cardRepo.addDefaultCards(loc);
-        }
-        if (!mounted) return;
-        _navigatorKey.currentState?.pushAndRemoveUntil(
+  void _handleLink(String link) async {
+    final userRepo = getIt<IUserRepository>();
+    
+    if (link.contains('finishSignIn')) {
+      final isSuccess = await userRepo.signInWithLink(link);
+      if (isSuccess) {
+        _navigatorKey.currentState?.pushReplacement(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
-          (route) => false,
-        );
-      } else {
-        // Пришли через "Войти" но аккаунта нет — такого не должно быть,
-        // но на всякий случай кидаем на AuthScreen
-        _navigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const AuthScreen()),
-          (route) => false,
         );
       }
     }
@@ -110,31 +85,25 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Consumer<LocaleProvider>(
       builder: (context, localeProvider, child) {
         return MaterialApp(
           navigatorKey: _navigatorKey,
-          theme: ThemeData(
-            useMaterial3: true,
-            fontFamily: 'Rubik',
-          ),
-          title: 'Drink Water',
-          // ЛОКАЛИЗАЦИЯ
           locale: localeProvider.currentLocale,
-          supportedLocales: const [
-            Locale('ru'),
-            Locale('en'),
-          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          home: context.watch<UserRepository>().isLoggedIn 
-              ? const HomeScreen() 
-              : const AuthScreen(),
+          debugShowCheckedModeBanner: false,
+          title: 'Drink Water',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            useMaterial3: true,
+          ),
+          home: const AuthScreen(), // или проверка авторизации
         );
       },
     );

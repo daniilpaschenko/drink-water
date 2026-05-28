@@ -6,8 +6,9 @@ import '../core/constants.dart';
 import 'water_repository.dart';
 import 'card_repository.dart';
 import '../models/user_data.dart';
+import 'package:injectable/injectable.dart';
 
-abstract class IUserRepository {
+abstract class IUserRepository extends ChangeNotifier{
   UserData? get currentUser;
   bool get isLoggedIn;
   bool get isLoading;
@@ -25,13 +26,19 @@ abstract class IUserRepository {
   void clearError();
 }
 
+@LazySingleton(as: IUserRepository)
 class UserRepository extends ChangeNotifier implements IUserRepository {
-  static final UserRepository _instance = UserRepository._internal();
-  factory UserRepository() => _instance;
-  UserRepository._internal();
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+  final IWaterRepository _waterRepository;
+  final ICardRepository _cardRepository;
 
-  final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
+  UserRepository(
+    this._auth,
+    this._firestore,
+    this._waterRepository,
+    this._cardRepository,
+  );
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -82,7 +89,7 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
         notifyListeners();
       }
     } catch (e) {
-      _setError("Ошибка загрузки локальных данных");
+      _setError("Error loading local data");
     }
   }
 
@@ -116,7 +123,7 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
         notifyListeners();
       }
     } catch (e) {
-      _setError("Не удалось загрузить данные из облака");
+      _setError("Failed to load data from the cloud");
     } finally {
       _setLoading(false);
     }
@@ -132,7 +139,7 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
         "customGoal": currentUser?.customGoal,
       }, SetOptions(merge: true));
     } catch (e) {
-      _setError("Не удалось сохранить данные в облако");
+      _setError("Failed to save data to the cloud");
       rethrow;
     }
   }
@@ -187,8 +194,8 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
         final doc = await _firestore.collection('users').doc(_uid).get();
         if (doc.exists) {
           await loadFromFirestore();
-          await WaterRepository().loadFromFirestore();
-          await CardRepository().loadFromFirestore();
+          await _waterRepository.loadFromFirestore();
+          await _cardRepository.loadFromFirestore();
         }
       } catch (e) {
         // Firestore временно недоступен — не страшно
@@ -253,7 +260,7 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
       await _saveToFirestore();
       notifyListeners();
     } catch (e) {
-      _setError("Ошибка при сохранении данных пользователя");
+      _setError("Error saving user data");
       rethrow;
     } finally {
       _setLoading(false);
@@ -284,7 +291,7 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
       await _saveToFirestore();
       notifyListeners();
     } catch (e) {
-      _setError("Не удалось изменить дневную цель");
+      _setError("Failed to change daily goal");
     } finally {
       _setLoading(false);
     }
@@ -299,7 +306,7 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
       await _auth.signOut();
       await clear();
     } catch (e) {
-      _setError("Ошибка при выходе из аккаунта");
+      _setError("Error signing out of account");
     } finally {
       _setLoading(false);
     }
@@ -313,7 +320,7 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
       await prefs.clear();
       notifyListeners();
     } catch (e) {
-      _setError("Ошибка очистки данных");
+      _setError("Error clearing data");
     }
   }
 }
