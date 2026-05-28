@@ -14,7 +14,7 @@ class WaterCardsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardRepo = context.watch<CardRepository>();
+    final cardRepo = context.watch<ICardRepository>();
     final loc = AppLocalizations.of(context)!;
     double screenW = MediaQuery.of(context).size.width;
 
@@ -34,7 +34,7 @@ class WaterCardsGrid extends StatelessWidget {
             title: card.title,
             value: loc.ml(amount),
             icon: appIcons[card.iconName] ?? FontAwesomeIcons.glassWater,
-            color: Colors.blue,
+            color: Color.fromARGB(255, 15, 11, 218),
             onTap: () => onCardTap(card),
             onLongPress: () => _showDeleteDialog(context, card.title, index),
           );
@@ -51,7 +51,7 @@ class WaterCardsGrid extends StatelessWidget {
   }
 
   void _showDeleteDialog(BuildContext context, String title, int index) {
-    final cardRepo = context.read<CardRepository>();
+    final cardRepo = context.read<ICardRepository>();
     final loc = AppLocalizations.of(context)!;
     double screenW = MediaQuery.of(context).size.width;
 
@@ -90,7 +90,7 @@ class WaterCardsGrid extends StatelessWidget {
     final mlController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     String selectedIcon = "glass";
-    final cardRepo = context.read<CardRepository>();
+    final cardRepo = context.read<ICardRepository>();
 
     showDialog(
       context: context,

@@ -11,6 +11,7 @@ PreferredSizeWidget buildMainAppBar({
   bool isSettingsEnabled = true, // управляет кнопкой настроек
   bool isInfoEnabled = true, // управляет кнопкой инфо
   bool isHistoryEnabled = true, // управляет уведомлениями
+  bool isHomeEnabled = true,
 }) {
   double screenW = MediaQuery.of(context).size.width;
   double titleSize = screenW * 0.04;
@@ -24,14 +25,21 @@ PreferredSizeWidget buildMainAppBar({
       title: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: () {
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const HomeScreen()), (route) => false);
-          },
+          onTap: isHomeEnabled
+              ? () => Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  (route) => false,
+                )
+              : null,
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               "Drink Water",
-              style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: titleSize,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),
@@ -44,14 +52,22 @@ PreferredSizeWidget buildMainAppBar({
             IconButton(
               iconSize: screenW * 0.05,
               onPressed: isAccountEnabled
-                  ? () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const AccountScreen()), (route) => false)
+                  ? () => Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AccountScreen()),
+                      (route) => false,
+                    )
                   : null,
               icon: const Icon(Icons.account_box_rounded),
             ),
             IconButton(
               iconSize: screenW * 0.05,
               onPressed: isHistoryEnabled
-                  ? () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const HistoryScreen()), (route) => false)
+                  ? () => Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                      (route) => false,
+                    )
                   : null,
               icon: const Icon(Icons.calendar_month),
             ),
@@ -63,7 +79,11 @@ PreferredSizeWidget buildMainAppBar({
           child: IconButton(
             iconSize: screenW * 0.05,
             onPressed: isInfoEnabled
-                ? () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const InfoScreen()), (route) => false)
+                ? () => Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const InfoScreen()),
+                    (route) => false,
+                  )
                 : null,
             icon: const Icon(Icons.info),
           ),
@@ -72,7 +92,11 @@ PreferredSizeWidget buildMainAppBar({
           child: IconButton(
             iconSize: screenW * 0.05,
             onPressed: isSettingsEnabled
-                ? () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const SettingsScreen()), (route) => false)
+                ? () => Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                    (route) => false,
+                  )
                 : null,
             icon: const Icon(Icons.settings),
           ),

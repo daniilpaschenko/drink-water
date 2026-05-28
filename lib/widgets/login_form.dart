@@ -24,7 +24,7 @@ class _LoginFormState extends State<LoginForm> {
     if (!mounted) return;
     if (!widget.formKey.currentState!.validate()) return;
     final email = widget.emailController.text.trim();
-    final userRepo = context.read<UserRepository>();
+    final userRepo = context.read<IUserRepository>();
     final success = await userRepo.sendSignInLink(email);
     if (!mounted) return;
     if (success) {
@@ -38,7 +38,7 @@ class _LoginFormState extends State<LoginForm> {
     final titleSize = screenW * 0.05;
     final loc = AppLocalizations.of(context)!;
 
-    return Consumer<UserRepository>(
+    return Consumer<IUserRepository>(
       builder: (context, userRepo, child) {
         if (userRepo.errorMessage != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {

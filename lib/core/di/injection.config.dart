@@ -17,6 +17,7 @@ import 'package:injectable/injectable.dart' as _i526;
 import '../../logic/card_repository.dart' as _i411;
 import '../../logic/user_repository.dart' as _i369;
 import '../../logic/water_repository.dart' as _i377;
+import 'firebase_module.dart' as _i616;
 
 // initializes the registration of main-scope dependencies inside of GetIt
 _i174.GetIt $initGetIt(
@@ -25,6 +26,9 @@ _i174.GetIt $initGetIt(
   _i526.EnvironmentFilter? environmentFilter,
 }) {
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
+  final firebaseModule = _$FirebaseModule();
+  gh.lazySingleton<_i59.FirebaseAuth>(() => firebaseModule.firebaseAuth);
+  gh.lazySingleton<_i974.FirebaseFirestore>(() => firebaseModule.firestore);
   gh.lazySingleton<_i377.IWaterRepository>(
     () => _i377.WaterRepository(
       gh<_i59.FirebaseAuth>(),
@@ -47,3 +51,5 @@ _i174.GetIt $initGetIt(
   );
   return getIt;
 }
+
+class _$FirebaseModule extends _i616.FirebaseModule {}

@@ -29,11 +29,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userRepo = context.watch<UserRepository>();
+    final userRepo = context.watch<IUserRepository>();
     if (userRepo.currentUser == null) return const SizedBox();
 
     return Scaffold(
-      appBar: buildMainAppBar(context: context),
+      appBar: buildMainAppBar(context: context, isHomeEnabled: false),
       body: HomeBody(onSuccess: _showSuccess),
     );
   }

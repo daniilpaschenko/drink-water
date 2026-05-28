@@ -30,7 +30,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   // литры за день
-  double _getLitersForDate(DateTime date, WaterRepository waterRepo) {
+  double _getLitersForDate(DateTime date, IWaterRepository waterRepo) {
     final key = date.toIso8601String().substring(0, 10);
     if (key == DateTime.now().toIso8601String().substring(0, 10)) {
       return waterRepo.drankLiters; // сегодня берём из текущего счётчика
@@ -42,8 +42,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     double screenW = MediaQuery.of(context).size.width;
     double titleSize = screenW * 0.04;
-    final user = context.watch<UserRepository>().currentUser!;
-    final waterRepo = context.watch<WaterRepository>();
+    final user = context.watch<IUserRepository>().currentUser!;
+    final waterRepo = context.watch<IWaterRepository>();
 
   final loc = AppLocalizations.of(context)!;
 

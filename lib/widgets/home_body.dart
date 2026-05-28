@@ -15,9 +15,8 @@ class HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userRepo = context.watch<UserRepository>();
-    final waterRepo = context.watch<WaterRepository>();
-    // final cardRepo = context.watch<CardRepository>();
+    final userRepo = context.watch<IUserRepository>();
+    final waterRepo = context.watch<IWaterRepository>();
     final user = userRepo.currentUser!;
 
     final loc = AppLocalizations.of(context)!;

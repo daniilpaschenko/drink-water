@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class WaterCard extends StatelessWidget {
+class WaterCard extends StatefulWidget {
   final String title;
   final String value;
   final dynamic icon;
@@ -20,6 +20,21 @@ class WaterCard extends StatelessWidget {
   });
 
   @override
+  State<WaterCard> createState() => _WaterCardState();
+}
+
+class _WaterCardState extends State<WaterCard> {
+  bool _tapped = false;
+
+  void _handleTap() {
+    setState(() => _tapped = true);
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) setState(() => _tapped = false);
+    });
+    widget.onTap();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -27,12 +42,15 @@ class WaterCard extends StatelessWidget {
         return MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
-            onTap: onTap,
-            onLongPress: onLongPress,
-            child: Container(
+            onTap: _handleTap,
+            onLongPress: widget.onLongPress,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                color: _tapped
+                    ? const Color.fromARGB(255, 180, 180, 180)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(25),
                 border: Border.all(
                   color: const Color.fromARGB(255, 15, 11, 218),
                 ),
@@ -40,16 +58,16 @@ class WaterCard extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  icon is IconData && icon is! FaIconData
-                      ? Icon(icon, color: color, size: iconSize)
-                      : FaIcon(icon, color: color, size: iconSize),
+                  widget.icon is IconData && widget.icon is! FaIconData
+                      ? Icon(widget.icon, color: widget.color, size: iconSize)
+                      : FaIcon(widget.icon, color: widget.color, size: iconSize),
                   SizedBox(height: constraints.maxHeight * 0.05),
                   Text(
-                    title,
+                    widget.title,
                     style: TextStyle(fontSize: constraints.maxWidth * 0.08),
                   ),
                   Text(
-                    value,
+                    widget.value,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: constraints.maxWidth * 0.12,

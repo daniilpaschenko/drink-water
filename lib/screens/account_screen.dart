@@ -33,7 +33,7 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   void _initControllers() {
-    final user = context.read<UserRepository>().currentUser;
+    final user = context.read<IUserRepository>().currentUser;
     _nameController = TextEditingController(text: user?.name ?? '');
     _weightController = TextEditingController(text: user?.weight.toStringAsFixed(1) ?? '');
     _goalController = TextEditingController(text: user?.dailyGoal.toStringAsFixed(2) ?? '');
@@ -51,7 +51,7 @@ class _AccountScreenState extends State<AccountScreen> {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
 
-    final userRepo = context.read<UserRepository>();
+    final userRepo = context.read<IUserRepository>();
     await userRepo.register(name, userRepo.currentUser!.weight);
 
     if (!mounted) return;
@@ -62,7 +62,7 @@ class _AccountScreenState extends State<AccountScreen> {
     final weight = double.tryParse(_weightController.text.trim().replaceAll(',', '.'));
     if (weight == null || weight < 20 || weight > 300) return;
 
-    final userRepo = context.read<UserRepository>();
+    final userRepo = context.read<IUserRepository>();
     await userRepo.register(userRepo.currentUser!.name, weight);
 
     if (!mounted) return;
@@ -73,14 +73,14 @@ class _AccountScreenState extends State<AccountScreen> {
     final goal = double.tryParse(_goalController.text.trim().replaceAll(',', '.'));
     if (goal == null || goal < 1 || goal > 20) return;
 
-    await context.read<UserRepository>().setCustomGoal(goal);
+    await context.read<IUserRepository>().setCustomGoal(goal);
 
     if (!mounted) return;
     setState(() => _editingGoal = false);
   }
 
   Future<void> _logout() async {
-    await context.read<UserRepository>().signOut();
+    await context.read<IUserRepository>().signOut();
 
     if (!mounted) return;
 
@@ -98,7 +98,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userRepo = context.watch<UserRepository>();
+    final userRepo = context.watch<IUserRepository>();
     if (userRepo.currentUser == null) return const SizedBox();
     final user = userRepo.currentUser!;
     // final waterRepo = context.watch<WaterRepository>();
@@ -173,9 +173,9 @@ class _AccountScreenState extends State<AccountScreen> {
                   IconButton(
                     icon: const Icon(Icons.refresh, color: Colors.grey),
                     onPressed: () async {
-                      await context.read<UserRepository>().setCustomGoal(null);
+                      await context.read<IUserRepository>().setCustomGoal(null);
                       if (!context.mounted) return;
-                      _goalController.text = context.read<UserRepository>().currentUser!.dailyGoal.toStringAsFixed(2);
+                      _goalController.text = context.read<IUserRepository>().currentUser!.dailyGoal.toStringAsFixed(2);
                       setState(() => _editingGoal = false);
                     },
                   ),

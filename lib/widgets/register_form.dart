@@ -33,7 +33,7 @@ class _RegisterFormState extends State<RegisterForm> {
       widget.weightController.text.trim().replaceAll(',', '.'),
     );
     final email = widget.emailController.text.trim();
-    final userRepo = context.read<UserRepository>();
+    final userRepo = context.read<IUserRepository>();
 
     await userRepo.savePendingRegistration(name, weight);
 
@@ -48,7 +48,7 @@ class _RegisterFormState extends State<RegisterForm> {
     final titleSize = screenW * 0.05;
     final loc = AppLocalizations.of(context)!;
 
-    return Consumer<UserRepository>(
+    return Consumer<IUserRepository>(
       builder: (context, userRepo, child) {
         if (userRepo.errorMessage != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
