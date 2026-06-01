@@ -1,5 +1,5 @@
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../l10n/app_localizations.dart';
+import 'l10n/app_localizations.dart';
 
 const Map<String, dynamic> appIcons = {
   "droplet": FontAwesomeIcons.droplet,

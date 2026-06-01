@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_links/app_links.dart';
-import 'screens/auth_screen.dart';
-import 'screens/home_screen.dart';
+import 'features/user/presentation/screens/auth_screen.dart';
+import 'features/water/presentation/screens/home_screen.dart';
 import 'core/di/injection.dart';
-import 'logic/user_repository.dart';
-import 'logic/water_repository.dart';
-import 'logic/card_repository.dart';
-import 'logic/locale_provider.dart';
-import 'l10n/app_localizations.dart';
+import 'features/user/domain/repositories/i_user_repository.dart';
+import 'features/water/domain/repositories/i_water_repository.dart';
+import 'features/card/domain/repositories/i_card_repository.dart';
+import 'core/l10n/locale_provider.dart';
+import 'core/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,7 +71,7 @@ class _MainAppState extends State<MainApp> {
 
   void _handleLink(String link) async {
     final userRepo = getIt<IUserRepository>();
-    
+
     if (link.contains('finishSignIn')) {
       final isSuccess = await userRepo.signInWithLink(link);
       if (isSuccess) {
@@ -99,11 +98,10 @@ class _MainAppState extends State<MainApp> {
           ],
           debugShowCheckedModeBanner: false,
           title: 'Drink Water',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            useMaterial3: true,
-          ),
-          home: const AuthScreen(), // или проверка авторизации
+          theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+          home: getIt<IUserRepository>().isLoggedIn
+              ? const HomeScreen()
+              : const AuthScreen(),
         );
       },
     );
