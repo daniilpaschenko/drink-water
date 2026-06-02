@@ -109,7 +109,7 @@ class _MainAppState extends State<MainApp> {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          debugShowCheckedModeBanner: false,
+          // debugShowCheckedModeBanner: false,
           title: 'Drink Water',
           theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
           home: getIt<IUserRepository>().isLoggedIn

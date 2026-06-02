@@ -1,7 +1,7 @@
 name: drink_water
 description: "A mobile app for tracking water consumption throughout the day"
 publish_to: 'none'
-version: 0.1.0
+version: 1.0.0
 
 environment:
   sdk: ^3.10.7
