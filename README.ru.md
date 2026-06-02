@@ -38,6 +38,7 @@
 
 ## Принципы разработки
 
+- Чистая архитектура (Clean Architecture)
 - Принципы SOLID
 - Repository Pattern
 - Внедрение зависимостей (Dependency Injection через Provider)

@@ -27,9 +27,11 @@ class RegisterForm extends StatefulWidget {
 
 class _RegisterFormState extends State<RegisterForm> {
   bool _linkSent = false;
+  bool _isProcessing = false;
 
   Future<void> _submit(BuildContext context) async {
   if (!widget.formKey.currentState!.validate()) return;
+  setState(() => _isProcessing = true);
 
   final name = widget.nameController.text.trim();
   final weight = double.parse(
@@ -44,6 +46,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
   final success = await signInUsecase(email, languageCode: locale.languageCode);
   if (!context.mounted) return;
+  setState(() => _isProcessing = false);
   if (success) setState(() => _linkSent = true);
 }
 
@@ -167,10 +170,10 @@ class _RegisterFormState extends State<RegisterForm> {
                 SizedBox(
                   height: screenW * 0.08,
                   child: ElevatedButton(
-                    onPressed: userRepo.isLoading
+                    onPressed: _isProcessing
                         ? null
                         : () => _submit(context),
-                    child: userRepo.isLoading
+                    child: _isProcessing
                         ? const SizedBox(
                             height: 24,
                             width: 24,

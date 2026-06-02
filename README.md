@@ -38,6 +38,7 @@ A mobile app for tracking water consumption throughout the day. Developed with F
 
 ## Development Principles
 
+- Clean Architecture
 - SOLID principles
 - Repository Pattern
 - Dependency Injection (Provider)

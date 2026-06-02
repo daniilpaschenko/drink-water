@@ -22,10 +22,12 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   bool _linkSent = false;
+  bool _isProcessing = false;
 
   Future<void> _submit() async {
     if (!mounted) return;
     if (!widget.formKey.currentState!.validate()) return;
+    setState(() => _isProcessing = true);
     final email = widget.emailController.text.trim();
     final locale = context.read<LocaleProvider>().currentLocale;
     final signInUsecase = getIt<SignInUsecase>();
@@ -34,6 +36,7 @@ class _LoginFormState extends State<LoginForm> {
       languageCode: locale.languageCode,
     );
     if (!mounted) return;
+    setState(() => _isProcessing = false);
     if (success) {
       setState(() => _linkSent = true);
     }
@@ -135,8 +138,8 @@ class _LoginFormState extends State<LoginForm> {
                 SizedBox(
                   height: screenW * 0.08,
                   child: ElevatedButton(
-                    onPressed: userRepo.isLoading ? null : () => _submit(),
-                    child: userRepo.isLoading
+                    onPressed: _isProcessing ? null : () => _submit(),
+                    child: _isProcessing
                         ? const SizedBox(
                             height: 24,
                             width: 24,

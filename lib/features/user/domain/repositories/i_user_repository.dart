@@ -6,6 +6,7 @@ abstract class IUserRepository extends ChangeNotifier {
   bool get isLoggedIn;
   bool get isLoading;
   String? get errorMessage;
+  bool get isProcessingLink;
 
   Future<void> load();
   Future<void> register(String name, double weight, {double? customGoal});

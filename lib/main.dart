@@ -16,10 +16,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // инициализация Dependency Injection
   await configureDependencies();
 
-  // загрузка начальных данных через репозитории
   final userRepo = getIt<IUserRepository>();
   final waterRepo = getIt<IWaterRepository>();
   final cardRepo = getIt<ICardRepository>();
@@ -70,14 +68,29 @@ class _MainAppState extends State<MainApp> {
   }
 
   void _handleLink(String link) async {
-    final userRepo = getIt<IUserRepository>();
-
     if (link.contains('finishSignIn')) {
+      final userRepo = getIt<IUserRepository>();
+
+      _navigatorKey.currentState?.push(
+        PageRouteBuilder(
+          opaque: false,
+          barrierColor: Colors.white,
+          pageBuilder: (_, _, _) => const Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      );
+
       final isSuccess = await userRepo.signInWithLink(link);
+
       if (isSuccess) {
-        _navigatorKey.currentState?.pushReplacement(
+        _navigatorKey.currentState?.pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
         );
+      } else {
+        _navigatorKey.currentState?.pop();
       }
     }
   }

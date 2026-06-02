@@ -25,6 +25,10 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
 
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isProcessingLink = false;
+
+  @override
+  bool get isProcessingLink => _isProcessingLink;
 
   @override
   bool get isLoading => _isLoading;
@@ -157,6 +161,8 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
 
   @override
   Future<bool> signInWithLink(String emailLink) async {
+    _isProcessingLink = true;
+    notifyListeners();
     _setLoading(true);
     _setError(null);
     try {
@@ -186,9 +192,11 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
         // currentUser останется null, completePendingRegistration отработает
       }
 
+      _isProcessingLink = false;
       notifyListeners();
       return true;
     } on FirebaseAuthException catch (e) {
+      _isProcessingLink = false;
       _setError(translateFirebaseError(e.code));
       return false;
     } finally {
