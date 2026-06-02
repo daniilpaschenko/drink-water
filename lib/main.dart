@@ -68,32 +68,31 @@ class _MainAppState extends State<MainApp> {
   }
 
   void _handleLink(String link) async {
-    if (link.contains('finishSignIn')) {
-      final userRepo = getIt<IUserRepository>();
+  if (link.contains('finishSignIn')) {
+    final userRepo = getIt<IUserRepository>();
 
-      _navigatorKey.currentState?.push(
-        PageRouteBuilder(
-          opaque: false,
-          barrierColor: Colors.white,
-          pageBuilder: (_, _, _) => const Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(child: CircularProgressIndicator()),
-          ),
+    _navigatorKey.currentState?.push(
+      PageRouteBuilder(
+        opaque: true,
+        pageBuilder: (_, _, _) => const Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(child: CircularProgressIndicator()),
         ),
+      ),
+    );
+
+    final isSuccess = await userRepo.signInWithLink(link);
+
+    if (isSuccess) {
+      _navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
       );
-
-      final isSuccess = await userRepo.signInWithLink(link);
-
-      if (isSuccess) {
-        _navigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-          (route) => false,
-        );
-      } else {
-        _navigatorKey.currentState?.pop();
-      }
+    } else {
+      _navigatorKey.currentState?.pop();
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {

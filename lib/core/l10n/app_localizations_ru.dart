@@ -12,7 +12,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appTitle => 'Drink Water';
 
   @override
-  String get name => 'Name';
+  String get name => 'Имя';
 
   @override
   String get weight => 'Вес';
