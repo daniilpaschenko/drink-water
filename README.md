@@ -60,13 +60,17 @@ A mobile app for tracking water consumption throughout the day. Developed with F
 - Responsive UI - all sizes are calculated from the screen width
 
 
-## Launching a project
+## Installation
+
+### Download APK (Android)
+Go to [Releases](https://github.com/daniilpaschenko/drink-water/releases) and download the APK for your device
+
+
+### Build from source
 
 **Requirements:**
 - Flutter SDK 3.x+
 - Dart 3.x+
-
-**Installation:**
 
 ```
 git clone https://github.com/daniilpaschenko/drink-water.git

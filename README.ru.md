@@ -61,13 +61,17 @@
 - Адаптивный интерфейс (Responsive UI) — все размеры рассчитываются относительно ширины экрана
 
 
-## Запуск проекта
+## Установка
+
+### Скачать APK (Android)
+Перейдите в раздел [Релизы](https://github.com/daniilpaschenko/drink-water/releases) и загрузите APK для своего устройства
+
+
+### Сборка из исходного кода
 
 **Требования:**
 - Flutter SDK 3.x+
 - Dart 3.x+
-
-**Установка:**
 
 ```
 git clone https://github.com/daniilpaschenko/drink-water.git
