@@ -7,7 +7,22 @@ A mobile app for tracking water consumption throughout the day. Developed with F
 
 ## Screenshots
 
-*will be here soon*
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/welcome.jpg" width="250" alt="Welcome"><br>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/home.jpg" width="250" alt="Home"><br>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/account.jpg" width="250" alt="Account"><br>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/info.jpg" width="250" alt="Info"><br>
+    </td>
+  </tr>
+</table>
 
 
 ## Functionality

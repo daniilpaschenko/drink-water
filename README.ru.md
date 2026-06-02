@@ -7,7 +7,22 @@
 
 ## Скриншоты
 
-*скоро здесь будут*
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/welcome.jpg" width="250" alt="Добро пожаловать"><br>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/home.jpg" width="250" alt="Домашняя страница"><br>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/account.jpg" width="250" alt="Аккаунт"><br>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/info.jpg" width="250" alt="Информация"><br>
+    </td>
+  </tr>
+</table>
 
 
 ## Функционал
