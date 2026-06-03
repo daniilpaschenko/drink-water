@@ -571,6 +571,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get english;
+
+  /// No description provided for @anonymousUserName.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get anonymousUserName;
 }
 
 class _AppLocalizationsDelegate

@@ -258,4 +258,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get english => 'Английский';
+
+  @override
+  String get anonymousUserName => 'Гость';
 }

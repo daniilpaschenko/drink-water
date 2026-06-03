@@ -142,7 +142,7 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
     try {
       await _auth.signInAnonymously();
 
-      const defaultName = 'User';
+      final defaultName = loc.anonymousUserName;
       const defaultWeight = 70.0;
 
       currentUser = UserData(name: defaultName, weight: defaultWeight);
@@ -330,7 +330,12 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
     _setError(null);
 
     try {
-      await _auth.signOut();
+      final firebaseUser = _auth.currentUser;
+      if (firebaseUser != null && firebaseUser.isAnonymous) {
+        await firebaseUser.delete();
+      } else {
+        await _auth.signOut();
+      }
       await clear();
     } catch (e) {
       _setError("Error signing out of account");

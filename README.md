@@ -27,7 +27,7 @@ A mobile app for tracking water consumption throughout the day. Developed with F
 
 ## Functionality
 
-- Passwordless authentication via magic link (email)
+- Passwordless authentication via magic link (email) or instant anonymous login
 - User registration with calculation of daily water intake by formula (weight × 33 ml)
 - Real-time tracking of water consumed with progress bar
 - Water consumption history by day with weekly calendar

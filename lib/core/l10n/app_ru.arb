@@ -106,5 +106,6 @@
     "defaultCardBottle": "Бутылка",
     "chooseLanguage": "Выберите свой язык",
     "russian": "Русский",
-    "english": "Английский"
+    "english": "Английский",
+    "anonymousUserName": "Гость"
 }

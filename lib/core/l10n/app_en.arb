@@ -106,5 +106,6 @@
     "defaultCardBottle": "Bottle",
     "chooseLanguage": "Choose your language",
     "russian": "Russian",
-    "english": "English"
+    "english": "English",
+    "anonymousUserName": "Guest"
 }

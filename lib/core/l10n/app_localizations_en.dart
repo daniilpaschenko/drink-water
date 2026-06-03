@@ -259,4 +259,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get english => 'English';
+
+  @override
+  String get anonymousUserName => 'Guest';
 }
