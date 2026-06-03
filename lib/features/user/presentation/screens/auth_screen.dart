@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'register_screen.dart';
 import 'login_screen.dart';
+import '../../../water/presentation/screens/home_screen.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../user/domain/repositories/i_user_repository.dart';
 
@@ -54,6 +55,40 @@ class AuthScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
                       child: Text(loc.login, style: TextStyle(fontSize: titleSize, color: const Color.fromARGB(255, 15, 11, 218))),
+                    ),
+                  ),
+                  SizedBox(height: screenW * 0.03),
+                  SizedBox(
+                    width: screenW * 0.8,
+                    height: screenW * 0.08,
+                    child: ElevatedButton(
+                      onPressed: userRepo.isLoading
+                          ? null
+                          : () async {
+                              final repo = context.read<IUserRepository>();
+                              await repo.signInAnonymously(loc);
+                              if (!context.mounted) return;
+                              if (repo.isLoggedIn) {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                                  (route) => false,
+                                );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey.shade100,
+                      ),
+                      child: userRepo.isLoading
+                          ? SizedBox(
+                              width: titleSize,
+                              height: titleSize,
+                              child: const CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              loc.anonymousLogin,
+                              style: TextStyle(fontSize: titleSize, color: Colors.grey.shade700),
+                            ),
                     ),
                   ),
                 ],

@@ -8,6 +8,7 @@ import '../../../card/domain/repositories/i_card_repository.dart';
 import '../../domain/entities/user_data.dart';
 import 'package:injectable/injectable.dart';
 import '../../domain/repositories/i_user_repository.dart';
+import '../../../../core/l10n/app_localizations.dart';
 
 @LazySingleton(as: IUserRepository)
 class UserRepository extends ChangeNotifier implements IUserRepository {
@@ -58,6 +59,8 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
   bool get isLoggedIn => currentUser != null;
 
   String? get _uid => _auth.currentUser?.uid;
+
+  bool get _isAnonymous => _auth.currentUser?.isAnonymous ?? false;
 
   @override
   Future<void> load() async {
@@ -132,6 +135,34 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
   }
 
   @override
+  Future<void> signInAnonymously(AppLocalizations loc) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      await _auth.signInAnonymously();
+
+      const defaultName = 'User';
+      const defaultWeight = 70.0;
+
+      currentUser = UserData(name: defaultName, weight: defaultWeight);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString("user_name", defaultName);
+      await prefs.setDouble("user_weight", defaultWeight);
+      await prefs.remove("custom_goal");
+
+      await _cardRepository.addDefaultCards(loc);
+
+      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      _setError(translateFirebaseError(e.code));
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  @override
   Future<bool> sendSignInLink(String email, {String languageCode = 'ru'}) async {
     _setLoading(true);
     _setError(null);
@@ -179,7 +210,6 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
       await _auth.signInWithEmailLink(email: email, emailLink: emailLink);
       await prefs.remove('pending_email');
 
-      // Firestore в отдельном try-catch — если недоступен, вход всё равно проходит
       try {
         final doc = await _firestore.collection('users').doc(_uid).get();
         if (doc.exists) {
@@ -189,7 +219,6 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
         }
       } catch (e) {
         // Firestore временно недоступен — не страшно
-        // currentUser останется null, completePendingRegistration отработает
       }
 
       _isProcessingLink = false;
@@ -204,7 +233,6 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
     }
   }
 
-  // сохраняем имя и вес пока пользователь ждёт ссылку на почте
   @override
   Future<void> savePendingRegistration(String name, double weight) async {
     final prefs = await SharedPreferences.getInstance();
@@ -212,7 +240,6 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
     await prefs.setDouble('pending_weight', weight);
   }
 
-  // достаёт сохранённые имя/вес и завершает регистрацию.
   @override
   Future<bool> completePendingRegistration() async {
     final prefs = await SharedPreferences.getInstance();
@@ -249,7 +276,11 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
         await prefs.remove("custom_goal");
       }
 
-      await _saveToFirestore();
+      // Сохраняем в Firestore только если пользователь не анонимный
+      if (!_isAnonymous) {
+        await _saveToFirestore();
+      }
+
       notifyListeners();
     } catch (e) {
       _setError("Error saving user data");
@@ -280,7 +311,11 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
         await prefs.remove("custom_goal");
       }
 
-      await _saveToFirestore();
+      // Сохраняем в Firestore только если пользователь не анонимный
+      if (!_isAnonymous) {
+        await _saveToFirestore();
+      }
+
       notifyListeners();
     } catch (e) {
       _setError("Failed to change daily goal");

@@ -16,7 +16,6 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
 
   CardRepository(this._auth, this._firestore);
 
-  // флаги обработки ошибок
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -45,6 +44,8 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
   List<BaseCard> customCards = [];
 
   String? get _uid => _auth.currentUser?.uid;
+
+  bool get _isAnonymous => _auth.currentUser?.isAnonymous ?? false;
 
   Future<void> _saveToFirestore() async {
     if (_uid == null) return;
@@ -120,7 +121,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
         CustomCard(title: title, liters: liters, iconName: iconName),
       );
       await _saveToPrefs();
-      await _saveToFirestore();
+      if (!_isAnonymous) await _saveToFirestore();
       notifyListeners();
       return true;
     } catch (e) {
@@ -142,7 +143,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
     try {
       customCards.removeAt(index);
       await _saveToPrefs();
-      await _saveToFirestore();
+      if (!_isAnonymous) await _saveToFirestore();
       notifyListeners();
       return true;
     } catch (e) {
@@ -171,7 +172,7 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
         ),
       ];
       await _saveToPrefs();
-      await _saveToFirestore();
+      if (!_isAnonymous) await _saveToFirestore();
       notifyListeners();
       return true;
     } catch (e) {

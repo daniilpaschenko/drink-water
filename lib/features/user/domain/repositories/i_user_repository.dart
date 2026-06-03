@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/user_data.dart';
+import '../../../../core/l10n/app_localizations.dart';
 
 abstract class IUserRepository extends ChangeNotifier {
   UserData? get currentUser;
@@ -17,5 +18,6 @@ abstract class IUserRepository extends ChangeNotifier {
   Future<void> savePendingRegistration(String name, double weight);
   Future<bool> completePendingRegistration();
   Future<void> signOut();
+  Future<void> signInAnonymously(AppLocalizations loc);
   void clearError();
 }

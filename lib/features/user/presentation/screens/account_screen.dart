@@ -99,9 +99,11 @@ class _AccountScreenState extends State<AccountScreen> {
     final userRepo = context.watch<IUserRepository>();
     if (userRepo.currentUser == null) return const SizedBox();
     final user = userRepo.currentUser!;
-    // final waterRepo = context.watch<WaterRepository>();
 
     final loc = AppLocalizations.of(context)!;
+
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    final isAnonymous = firebaseUser?.isAnonymous ?? false;
 
     double screenW = MediaQuery.of(context).size.width;
     double titleSize = screenW * 0.04;
@@ -132,7 +134,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
               EditableField(
                 label: "${loc.weight} (${loc.kg})",
-                value: "${loc.weight}: ${user.weight.toStringAsFixed(1)} кг",
+                value: "${loc.weight}: ${user.weight.toStringAsFixed(1)} (${loc.kg})",
                 isEditing: _editingWeight,
                 controller: _weightController,
                 onEdit: () => setState(() => _editingWeight = true),
@@ -183,9 +185,15 @@ class _AccountScreenState extends State<AccountScreen> {
               SizedBox(height: screenW * 0.1),
 
               Text(
-                "${loc.email}: ${FirebaseAuth.instance.currentUser?.email ?? '—'}",
+                isAnonymous
+                    ? loc.loggedInAnonymously
+                    : "${loc.email}: ${firebaseUser?.email ?? '—'}",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: titleSize)
+                style: TextStyle(
+                  fontSize: titleSize,
+                  color: isAnonymous ? Colors.grey : null,
+                  fontStyle: isAnonymous ? FontStyle.italic : null,
+                ),
               ),
 
               SizedBox(height: screenW * 0.1),
@@ -199,7 +207,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     context: context,
                     builder: (_) => AlertDialog(
                       content: Text(
-                        loc.wantToLogout,
+                        isAnonymous ? loc.wantToLogoutAnonymous : loc.wantToLogout,
                         style: TextStyle(fontSize: screenW * 0.04),
                       ),
                       actions: [
@@ -209,7 +217,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         ),
                         TextButton(
                           onPressed: _logout,
-                          child: Text(loc.logout, 
+                          child: Text(loc.logout,
                               style: TextStyle(fontSize: screenW * 0.04, color: Colors.red)),
                         ),
                       ],

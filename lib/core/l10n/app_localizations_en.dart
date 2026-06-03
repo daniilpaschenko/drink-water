@@ -34,6 +34,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to log out of your account?';
 
   @override
+  String get wantToLogoutAnonymous =>
+      'You are signed in anonymously. All data will be deleted on sign out. Continue?';
+
+  @override
   String get cancel => 'Cancel';
 
   @override
@@ -50,6 +54,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get login => 'Log in';
+
+  @override
+  String get anonymousLogin => 'Continue anonymously';
+
+  @override
+  String get loggedInAnonymously => 'You are signed in anonymously';
 
   @override
   String get outOf => 'out of';

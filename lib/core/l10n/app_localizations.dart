@@ -146,6 +146,12 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to log out of your account?'**
   String get wantToLogout;
 
+  /// No description provided for @wantToLogoutAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'You are signed in anonymously. All data will be deleted on sign out. Continue?'**
+  String get wantToLogoutAnonymous;
+
   /// No description provided for @cancel.
   ///
   /// In en, this message translates to:
@@ -181,6 +187,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Log in'**
   String get login;
+
+  /// No description provided for @anonymousLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue anonymously'**
+  String get anonymousLogin;
+
+  /// No description provided for @loggedInAnonymously.
+  ///
+  /// In en, this message translates to:
+  /// **'You are signed in anonymously'**
+  String get loggedInAnonymously;
 
   /// No description provided for @outOf.
   ///

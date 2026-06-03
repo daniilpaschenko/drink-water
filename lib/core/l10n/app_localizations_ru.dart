@@ -33,6 +33,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get wantToLogout => 'Вы уверены, что хотите выйти из аккаунта?';
 
   @override
+  String get wantToLogoutAnonymous =>
+      'Вы вошли анонимно. При выходе все данные будут удалены. Продолжить?';
+
+  @override
   String get cancel => 'Отмена';
 
   @override
@@ -49,6 +53,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get login => 'Войти';
+
+  @override
+  String get anonymousLogin => 'Войти анонимно';
+
+  @override
+  String get loggedInAnonymously => 'Вы вошли анонимно';
 
   @override
   String get outOf => 'из';
