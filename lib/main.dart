@@ -68,31 +68,55 @@ class _MainAppState extends State<MainApp> {
   }
 
   void _handleLink(String link) async {
-  if (link.contains('finishSignIn')) {
-    final userRepo = getIt<IUserRepository>();
+    if (link.contains('finishSignIn')) {
+      final userRepo = getIt<IUserRepository>();
+      final context = _navigatorKey.currentContext;
+      if (context == null) return;
+      final loc = AppLocalizations.of(context)!;
 
-    _navigatorKey.currentState?.push(
-      PageRouteBuilder(
-        opaque: true,
-        pageBuilder: (_, _, _) => const Scaffold(
-          backgroundColor: Colors.white,
-          body: Center(child: CircularProgressIndicator()),
+      _navigatorKey.currentState?.push(
+        PageRouteBuilder(
+          opaque: true,
+          pageBuilder: (context, animation, secondaryAnimation) => const Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(child: CircularProgressIndicator()),
+          ),
         ),
-      ),
-    );
-
-    final isSuccess = await userRepo.signInWithLink(link);
-
-    if (isSuccess) {
-      _navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
       );
-    } else {
-      _navigatorKey.currentState?.pop();
+
+      final isSuccess = await userRepo.signInWithLink(link, loc);
+
+      if (isSuccess) {
+        if (userRepo.isLoggedIn) {
+          // Существующий пользователь — данные загружены из Firestore
+          _navigatorKey.currentState?.pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+            (route) => false,
+          );
+        } else {
+            // Новый пользователь
+            final completed = await userRepo.completePendingRegistration();
+            if (completed) {
+              // Теперь документ в Firestore создан — добавляем карточки
+              await getIt<ICardRepository>().addDefaultCards(loc);
+              if (userRepo.isLoggedIn) {
+                _navigatorKey.currentState?.pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  (route) => false,
+                );
+              }
+            } else {
+              _navigatorKey.currentState?.pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const AuthScreen()),
+                (route) => false,
+              );
+            }
+          }
+      } else {
+        _navigatorKey.currentState?.pop();
+      }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {

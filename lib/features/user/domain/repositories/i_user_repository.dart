@@ -14,7 +14,7 @@ abstract class IUserRepository extends ChangeNotifier {
   Future<void> setCustomGoal(double? goal);
   Future<void> clear();
   Future<bool> sendSignInLink(String email, {String languageCode = 'ru'});
-  Future<bool> signInWithLink(String emailLink);
+  Future<bool> signInWithLink(String emailLink, AppLocalizations loc);
   Future<void> savePendingRegistration(String name, double weight);
   Future<bool> completePendingRegistration();
   Future<void> signOut();

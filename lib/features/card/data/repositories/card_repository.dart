@@ -50,14 +50,14 @@ class CardRepository extends ChangeNotifier implements ICardRepository {
   Future<void> _saveToFirestore() async {
     if (_uid == null) return;
     try {
-      await _firestore.collection("users").doc(_uid).update({
+      await _firestore.collection("users").doc(_uid).set({
         "cards": customCards.map((e) => CustomCardModel.fromEntity(e as CustomCard).toJson()).toList(),
-      });
+      }, SetOptions(merge: true)); // ← set вместо update
     } catch (e) {
       _setError("Failed to save cards to the cloud");
       rethrow;
     }
-  }
+}
 
   Future<void> _saveToPrefs() async {
     try {

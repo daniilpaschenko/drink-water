@@ -99,7 +99,11 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
             ? (data["customGoal"] as num).toDouble()
             : null;
 
-        currentUser = UserData(name: name, weight: weight, customGoal: customGoal);
+        currentUser = UserData(
+          name: name,
+          weight: weight,
+          customGoal: customGoal,
+        );
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("user_name", name);
@@ -163,7 +167,10 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
   }
 
   @override
-  Future<bool> sendSignInLink(String email, {String languageCode = 'ru'}) async {
+  Future<bool> sendSignInLink(
+    String email, {
+    String languageCode = 'ru',
+  }) async {
     _setLoading(true);
     _setError(null);
     try {
@@ -191,7 +198,7 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
   }
 
   @override
-  Future<bool> signInWithLink(String emailLink) async {
+  Future<bool> signInWithLink(String emailLink, AppLocalizations loc) async {
     _isProcessingLink = true;
     notifyListeners();
     _setLoading(true);
@@ -200,7 +207,9 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
       final prefs = await SharedPreferences.getInstance();
       final email = prefs.getString('pending_email');
       if (email == null) {
-        _setError('Email not found. Enter your email and request the link again.');
+        _setError(
+          'Email not found. Enter your email and request the link again.',
+        );
         return false;
       }
       if (!_auth.isSignInWithEmailLink(emailLink)) {
@@ -217,8 +226,9 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
           await _waterRepository.loadFromFirestore();
           await _cardRepository.loadFromFirestore();
         }
+        // новый пользователь — ничего не делаем, main.dart разберётся
       } catch (e) {
-        // Firestore временно недоступен — не страшно
+        debugPrint('Firestore error: $e');
       }
 
       _isProcessingLink = false;
@@ -256,7 +266,11 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
   }
 
   @override
-  Future<void> register(String name, double weight, {double? customGoal}) async {
+  Future<void> register(
+    String name,
+    double weight, {
+    double? customGoal,
+  }) async {
     _setLoading(true);
     _setError(null);
 
@@ -336,6 +350,7 @@ class UserRepository extends ChangeNotifier implements IUserRepository {
       } else {
         await _auth.signOut();
       }
+      _isProcessingLink = false; 
       await clear();
     } catch (e) {
       _setError("Error signing out of account");
