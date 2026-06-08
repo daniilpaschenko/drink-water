@@ -64,18 +64,8 @@
 ## Установка
 
 ### Скачать APK (Android)
+[![Скачать из RuStore](https://tools.rustore.ru/badges/download-ru.svg)](https://www.rustore.ru/catalog/app/com.example.drink_water)
+
+**ИЛИ**
+
 Перейдите в раздел [Релизы](https://github.com/daniilpaschenko/drink-water/releases) и загрузите APK для своего устройства
-
-
-### Сборка из исходного кода
-
-**Требования:**
-- Flutter SDK 3.x+
-- Dart 3.x+
-
-```
-git clone https://github.com/daniilpaschenko/drink-water.git
-cd drink-water
-flutter pub get
-flutter run
-```
