@@ -67,4 +67,4 @@
 > 🤖 **[Скачать приложение в RuStore](https://www.rustore.ru/catalog/app/com.example.drink_water)**
 
 ### Скачать APK (Android)
-Перейдите в раздел [Релизы](https://github.com/daniilpaschenko/drink-water/releases) и загрузите APK для своего устройства
+> Перейдите в раздел [Релизы](https://github.com/daniilpaschenko/drink-water/releases) и загрузите APK для своего устройства
